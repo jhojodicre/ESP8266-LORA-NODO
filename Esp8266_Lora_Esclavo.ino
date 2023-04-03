@@ -28,10 +28,10 @@
   String inputString;                     // Buffer recepcion Serial.
   volatile  bool stringComplete= false;   // Flag: mensaje Serial Recibido completo.
   //********************************************************
-  //   -3.1 Variables para las Interrupciones
+  //-3.1 Variables para las Interrupciones
 
   //********************************************************
-  //    -3.2 Variables Globales para Las Funciones.
+  //-3.2 Variables Globales para Las Funciones.
   bool inicio=true;             // Habilitar mensaje de inicio por unica vez
   String funtion_Mode;          // Tipo de funcion para ejecutar.
   String funtion_Number;        // Numero de funcion a EJECUTAR.
@@ -40,7 +40,7 @@
   bool codified_funtion=false;  // Notifica que la funcion ha sido codificada.
 
   //********************************************************
-  //    -3.3 Variables para RF95
+  //-3.3 Variables para RF95
   int16_t packetnum = 0;  // packet counter, we increment per xmission
   unsigned int placa; // placa en el perimetro.
   unsigned int zona;  // Zona del perimetro.
@@ -48,8 +48,6 @@
 //4. Intancias.
   //********************************************************
   RH_RF95 rf95(RFM95_CS, RFM95_INT);
-
-
 //5. Funciones ISR.
   //********************************************************
   // 5.1 funciones de interrupcion.
@@ -74,36 +72,24 @@ void setup() {
     pinMode(RFM95_INT,OUTPUT);
     pinMode(RFM95_RST, OUTPUT);
     pinMode(LED_azul, OUTPUT);
-
     //    1.2 Configuracion de Entradas
     //****************************
-
   //2. Condiciones Iniciales.
     //    2.1 Estado de Salidas.
     digitalWrite(LED_azul,HIGH);
     digitalWrite(RFM95_RST, HIGH);
-  
     //    2.2 Valores y Espacios de Variables
-
-  
   //3. Configuracion de Perifericos:
     //****************************
     //    - 3.1 Initialize serial communication at 9600 bits per second:
     Serial.begin(9600);
     delay(10);
-
-
-  
     //    - 3.2 Interrupciones Habilitadas.
-    //****************************
-    //interrupts ();
-
-  
+      //****************************
+      //interrupts ();
   //4. Prueba de Sitema Minimo Configurado.
     //****************************
     Serial.println("Sistema Minimo Configurado");
-
-  
   //5. Configuracion de DEVICE externos.
     //****************************
     //    5.1 Configuracion RF95
@@ -145,7 +131,18 @@ void loop(){
       welcome();
       led_Monitor(2);
     }
-  //2. Decodificar Funcion
+
+  //2. Decodificar funcion serial
+    if(stringComplete){
+      decodificar_solicitud();
+    }
+  //3. Ejecutar Funcion
+    if(codified_funtion){
+      ejecutar_solicitud();
+      // 3.1 Desactivar Banderas.
+      codified_funtion=false;
+    }
+  //4. Recibir Mensjae From RFM95W
     if (rf95.available()){
       // Should be a message for us now   
       uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
@@ -171,13 +168,7 @@ void loop(){
       {
         Serial.println("Receive failed");
       }
-    }
-  //3. Ejecutar Funcion
-    if(codified_funtion){
-      ejecutar_solicitud();
-      // 3.1 Desactivar Banderas.
-      codified_funtion=false;
-    }
+    }    
 }
 //    Funciones de Logic interna del Micro.
   void welcome(){
@@ -196,6 +187,22 @@ void loop(){
       digitalWrite(LED_azul, HIGH);    // Led OFF.
       delay(500);                    // pausa 1 seg.
     }
+  }
+  void decodificar_solicitud(){
+    //Deshabilitamos Banderas
+    stringComplete=false;
+    codified_funtion=true;
+    Serial.println(inputString);         // Pureba de Comunicacion Serial.
+    funtion_Mode=inputString.substring(0,1);
+    funtion_Number=inputString.substring(1,2);
+    funtion_Parmeter1=inputString.substring(2,3);
+    funtion_Parmeter2=inputString.substring(3,4);
+    inputString="";
+    Serial.println("funcion: " + funtion_Mode);
+    Serial.println("Numero: " + funtion_Number);
+    Serial.println("Parametro1: " + funtion_Parmeter1);
+    Serial.println("Parametro2: " + funtion_Parmeter2+ "\n");
+    //Serial.println("Numero de funcion: ")
   }
 //    Funciones de dispositivo externos.
   void rf95_mensaje(){
@@ -264,18 +271,20 @@ void loop(){
 //    Ultima Funcion.
   void ejecutar_solicitud(){
     // Deshabilitamos Banderas
-    stringComplete=false;
-    codified_funtion=true;
-    Serial.println(inputString);         // Pureba de Comunicacion Serial.
-    funtion_Mode=inputString.substring(0,1);
-    funtion_Number=inputString.substring(1,2);
-    funtion_Parmeter1=inputString.substring(2,3);
-    funtion_Parmeter2=inputString.substring(3,4);
-    inputString="";
-    Serial.println("funcion: " + funtion_Mode);
-    Serial.println("Numero: " + funtion_Number);
-    Serial.println("Parametro1: " + funtion_Parmeter1);
-    Serial.println("Parametro2: " + funtion_Parmeter2+ "\n");
-    //Serial.println("Numero de funcion: ")
-
+    if (funtion_Number=="1"){
+      int x1=funtion_Parmeter1.toInt();
+      int x2=funtion_Parmeter2.toInt();
+      Serial.println("funion Nº1");
+      f1_Destellos(x1,x2);
+    }
+    if (funtion_Number=="2"){
+      Serial.println("funion Nº2");
+    }
+    if (funtion_Number=="3"){
+      Serial.println("funion Nº3");
+    }
+    else{
+      Serial.println("Ninguna Funcion");
+    }
+      
   }
