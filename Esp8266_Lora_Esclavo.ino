@@ -47,7 +47,8 @@
   char radiopacket[32] = "012345 23456789 1   ";
 //4. Intancias.
   //********************************************************
-  RH_RF95 rf95(RFM95_CS, RFM95_INT);
+  //RH_RF95 rf95(RFM95_CS, RFM95_INT);
+  RH_RF95 rf95;
 //5. Funciones ISR.
   //********************************************************
   // 5.1 funciones de interrupcion.
