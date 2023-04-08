@@ -1,7 +1,7 @@
 //1. librerias.
   //********************************************************
   #include <SPI.h>
-  #include <RH_RF95.h>
+  #include <LoRa.h>
   //********************************************************
 //2. Definicion de Pinout.
   //      Las Etiquetas para los pinout son los que comienzan con GPIO
@@ -17,12 +17,12 @@
   //********************************************************
   //      - 2.3 Modulo de comunicaion rfm95
   #define RFM95_CS 15
-  #define RFM95_INT 5
+  #define RFM95_INIT 5
   #define RFM95_RST 0
 
   //********************************************************
   //    - 2.4. Constantes
-  #define RF95_FREQ 915.0
+  #define RFM95_FREQ 915E6
   //********************************************************
 //3. Variables Globales.
   String inputString;                     // Buffer recepcion Serial.
@@ -32,22 +32,22 @@
 
   //********************************************************
   //-3.2 Variables Globales para Las Funciones.
-  bool inicio=true;             // Habilitar mensaje de inicio por unica vez
-  String funtion_Mode;          // Tipo de funcion para ejecutar.
-  String funtion_Number;        // Numero de funcion a EJECUTAR.
-  String funtion_Parmeter1;     // Parametro 1 de la Funcion;
-  String funtion_Parmeter2;     // Parametro 2 de la Funcion;
-  bool codified_funtion=false;  // Notifica que la funcion ha sido codificada.
+    bool inicio=true;             // Habilitar mensaje de inicio por unica vez
+    String funtion_Mode;          // Tipo de funcion para ejecutar.
+    String funtion_Number;        // Numero de funcion a EJECUTAR.
+    String funtion_Parmeter1;     // Parametro 1 de la Funcion;
+    String funtion_Parmeter2;     // Parametro 2 de la Funcion;
+    bool codified_funtion=false;  // Notifica que la funcion ha sido codificada.
 
   //********************************************************
   //-3.3 Variables para RF95
-  int16_t packetnum = 0;  // packet counter, we increment per xmission
-  unsigned int placa; // placa en el perimetro.
-  unsigned int zona;  // Zona del perimetro.
-  char radiopacket[32] = "012345 23456789 1   ";
+    int16_t packetnum = 0;  // packet counter, we increment per xmission
+    unsigned int placa; // placa en el perimetro.
+    unsigned int zona;  // Zona del perimetro.
+    char radiopacket[32] = "012345 23456789 1   ";
+    int packetSize = 0;
 //4. Intancias.
   //********************************************************
-  RH_RF95 rf95(RFM95_CS, RFM95_INT);
 //5. Funciones ISR.
   //********************************************************
   // 5.1 funciones de interrupcion.
@@ -68,23 +68,24 @@
 void setup() {
   //1. Configuracion de Puertos.
     //****************************
-    //    1.1 Configuracion de Salidas:
-    pinMode(RFM95_INT,OUTPUT);
-    pinMode(RFM95_RST, OUTPUT);
-    pinMode(LED_azul, OUTPUT);
-    //    1.2 Configuracion de Entradas
-    //****************************
+    //1.1 Configuracion de Salidas:
+      pinMode(RFM95_INIT,OUTPUT);
+      pinMode(RFM95_RST, OUTPUT);
+      pinMode(LED_azul, OUTPUT);
+    //1.2 Configuracion de Entradas
+    
   //2. Condiciones Iniciales.
+    //****************************
     //    2.1 Estado de Salidas.
-    digitalWrite(LED_azul,HIGH);
-    digitalWrite(RFM95_RST, HIGH);
+      digitalWrite(LED_azul,HIGH);
+      digitalWrite(RFM95_RST, HIGH);
     //    2.2 Valores y Espacios de Variables
   //3. Configuracion de Perifericos:
     //****************************
-    //    - 3.1 Initialize serial communication at 9600 bits per second:
-    Serial.begin(9600);
-    delay(10);
-    //    - 3.2 Interrupciones Habilitadas.
+    //-3.1 Initialize serial communication at 9600 bits per second:
+      Serial.begin(9600);
+      delay(10);
+    //-3.2 Interrupciones Habilitadas.
       //****************************
       //interrupts ();
   //4. Prueba de Sitema Minimo Configurado.
@@ -92,91 +93,60 @@ void setup() {
     Serial.println("Sistema Minimo Configurado");
   //5. Configuracion de DEVICE externos.
     //****************************
-    //    5.1 Configuracion RF95
-    //    5.1.1 RESET.
-    digitalWrite(RFM95_RST, LOW);
-    delay(10);
-    digitalWrite(RFM95_RST, HIGH);
-    delay(10);
-  
-    //    5.1.2 INIT. RF95
-    //****************************
-    while (!rf95.init()) {
-      Serial.println("LoRa radio init failed");
-      while (1);
-    }
-    Serial.println("LoRa radio init OK!");
-    //****************************
-    //    5.1.3 SET FRECUENCY
-    if (!rf95.setFrequency(RF95_FREQ)) {
-      Serial.println("setFrequency failed");
-      while (1);
-    }
-    Serial.print("Set Freq to: ");
-    Serial.println(RF95_FREQ);  
-    // The default transmitter power is 13dBm, using PA_BOOST.
-    // If you are using RFM95 / 96/97/98 modules using the transmitter pin PA_BOOST, then
-    // you can set transmission powers from 5 to 23 dBm:
+    //-5.1 RFM95 Configuracion.
+      LoRa.setPins(RFM95_CS, RFM95_RST, RFM95_INIT);
 
-  
-    //    5.1.4 SET POWER TRANSMIT
-    //****************************
-    rf95.setTxPower(23, false);
+    //-5.2 RFM95 Iniciar.
+      //****************************
+      if (!LoRa.begin(RFM95_FREQ)) {
+        Serial.println("Starting LoRa failed!");
+        while (1);
+      }
+      Serial.println("LoRa radio init OK! FREQ= 915 Mhz");
+      //****************************
 }
 void loop(){
-  //1. Mensaje de Bienvenida 
-    // Para Comprobar el Sistema minimo de Funcionamiento.
+  //1. Bienvenida Funcion 
     //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     while (inicio){
-      welcome();
+      welcome();        // Comprobamos el Sistema minimo de Funcionamiento.
       led_Monitor(2);
     }
-
   //2. Decodificar funcion serial
+    //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     if(stringComplete){
       decodificar_solicitud();
     }
   //3. Ejecutar Funcion
+    //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     if(codified_funtion){
       ejecutar_solicitud();
       // 3.1 Desactivar Banderas.
       codified_funtion=false;
     }
-  //4. Recibir Mensjae From RFM95W
-    if (rf95.available()){
-      // Should be a message for us now   
-      uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
-      uint8_t len = sizeof(buf);
-      
-      if (rf95.recv(buf, &len))
-      {
-        digitalWrite(LED_azul, HIGH);
-        RH_RF95::printBuffer("Received: ", buf, len);
-        Serial.print("Got: ");
-        Serial.println((char*)buf);
-        Serial.print("RSSI: ");
-        Serial.println(rf95.lastRssi(), DEC);
-        
-        // Send a reply
-        uint8_t data[] = "And hello back to you";
-        rf95.send(data, sizeof(data));
-        rf95.waitPacketSent();
-        Serial.println("Sent a reply");
-        digitalWrite(LED_azul, LOW);
+  //4. RFM95 Funciones.
+    //-4.1 RFM95 RUN.
+      packetSize = LoRa.parsePacket();
+      if (packetSize) {
+        // received a packet
+        Serial.print("Received packet '");
+  
+        // read packet
+        while (LoRa.available()) {
+          Serial.print((char)LoRa.read());
+        }
+        // print RSSI of packet
+        Serial.print("' with RSSI ");
+        Serial.println(LoRa.packetRssi());
       }
-      else
-      {
-        Serial.println("Receive failed");
-      }
-    }    
 }
 //    Funciones de Logic interna del Micro.
   void welcome(){
     // Deshabilitamos Banderas
-    inicio=false;
-    Serial.println("Comenzamos el Programa");
-    Serial.println("Esperamos recibir un Dato");
-    Serial.println("ESP8266 NODO 1");
+      inicio=false;
+      Serial.println("Comenzamos el Programa");
+      Serial.println("Esperamos recibir un Dato");
+      Serial.println("ESP8266 ESCLAVO CONFIGURADO");
   }
   void led_Monitor(int repeticiones){
     // Deshabilitamos Banderas
@@ -204,54 +174,6 @@ void loop(){
     Serial.println("Parametro2: " + funtion_Parmeter2+ "\n");
     //Serial.println("Numero de funcion: ")
   }
-//    Funciones de dispositivo externos.
-  void rf95_mensaje(){
-    Serial.println("Sending to rf95_server");     // ___DEBUG
-    char radiopacket[32] = "012345 23456789 1   ";
-    itoa(packetnum++, radiopacket+16, 10);                // 7. Convertimos una cadena a nuemeros de base 10 en caracter.
-    Serial.print("Sending ");
-    Serial.println(radiopacket);
-    radiopacket[31] = 0;
-    Serial.println("Sending..."); 
-    delay(10);
-  }
-  void rf95_enviar(){
-    rf95.send((uint8_t *)radiopacket, 20);
-    digitalWrite(LED_azul, HIGH);
-    Serial.println("Waiting for packet to complete...");
-    delay(10);
-    rf95.waitPacketSent();
-  }
-  void rf95_recibir(){
-    // Now wait for a reply
-    uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
-    uint8_t len = sizeof(buf);
-
-    Serial.println("Waiting for reply..."); 
-    delay(10);
-    if (rf95.waitAvailableTimeout(1000))
-    { 
-      // Should be a reply message for us now   
-      if (rf95.recv(buf, &len))
-    {
-        Serial.print("Got reply: ");
-        Serial.println((char*)buf);
-        Serial.print("RSSI: ");
-        Serial.println(rf95.lastRssi(), DEC);    
-      }
-      else
-      {
-        Serial.println("Receive failed");
-      }
-    }
-    else
-    {
-      Serial.println("No reply, is there a listener around?");
-    }
-    
-    delay(1000);
-    digitalWrite(LED_azul, LOW);
-  }
 //    Funciones Seleccionadas para Ejecutar.
   void f1_Destellos (int repeticiones, int tiempo){
     int veces=repeticiones;
@@ -264,7 +186,7 @@ void loop(){
       digitalWrite(LED_azul, HIGH);    // Led OFF.
     }
   }
-  void f2_serial_Enviar(){
+  void f2_serial_Enviar(int direccion, int buffer){
     // Deshabilitamos Banderas
     Serial.println("hola");         // Pureba de Comunicacion Serial.
   }
