@@ -45,7 +45,16 @@
     unsigned int placa; // placa en el perimetro.
     unsigned int zona;  // Zona del perimetro.
     char radiopacket[32] = "012345 23456789 1   ";
+
+
     int packetSize = 0;
+    String outgoing;              // outgoing message
+    byte msgCount = 0;            // count of outgoing messages
+    byte localAddress = 0xBB;     // address of this device
+    byte destination = 0xFF;      // destination to send to
+    long lastSendTime = 0;        // last send time
+    int interval = 2000;          // interval between sends.
+
 //4. Intancias.
   //********************************************************
 //5. Funciones ISR.
@@ -126,21 +135,9 @@ void loop(){
     }
   //4. RFM95 Funciones.
     //-4.1 RFM95 RUN.
-      packetSize = LoRa.parsePacket();
-      if (packetSize) {
-        // received a packet
-        Serial.print("Received packet '");
-  
-        // read packet
-        while (LoRa.available()) {
-          Serial.print((char)LoRa.read());
-        }
-        // print RSSI of packet
-        Serial.print("' with RSSI ");
-        Serial.println(LoRa.packetRssi());
-      }
+      RFM95_recibir(LoRa.parsePacket());
 }
-//    Funciones de Logic interna del Micro.
+//1. Funciones de Logic interna del Micro.
   void welcome(){
     // Deshabilitamos Banderas
       inicio=false;
@@ -174,7 +171,7 @@ void loop(){
     Serial.println("Parametro2: " + funtion_Parmeter2+ "\n");
     //Serial.println("Numero de funcion: ")
   }
-//    Funciones Seleccionadas para Ejecutar.
+//2. Funciones Seleccionadas para Ejecutar.
   void f1_Destellos (int repeticiones, int tiempo){
     int veces=repeticiones;
     int retardo=tiempo*100;
@@ -190,7 +187,7 @@ void loop(){
     // Deshabilitamos Banderas
     Serial.println("hola");         // Pureba de Comunicacion Serial.
   }
-//    Ultima Funcion.
+//3. Ultima Funcion.
   void ejecutar_solicitud(){
     // Deshabilitamos Banderas
     if (funtion_Number=="1"){
@@ -210,3 +207,46 @@ void loop(){
     }
       
   }
+//4. Funciones de Dispositivos Externos.
+  //-4.1 RFM95_ENVIAR.
+    void RFM95_enviar(String outgoing){
+      LoRa.beginPacket();                   // start packet
+      LoRa.write(destination);              // add destination address
+      LoRa.write(localAddress);             // add sender address
+      LoRa.write(msgCount);                 // add message ID
+      LoRa.write(outgoing.length());        // add payload length
+      LoRa.print(outgoing);                 // add payload
+      LoRa.endPacket();                     // finish packet and send it
+      msgCount++;                           // increment message ID
+    }
+  //-4.2 RFM95_RECIBIR.
+    void RFM95_recibir(int packetSize){
+      if (packetSize == 0) return;          // if there's no packet, return
+      // read packet header bytes:
+      int recipient = LoRa.read();          // recipient address
+      byte sender = LoRa.read();            // sender address
+      byte incomingMsgId = LoRa.read();     // incoming msg ID
+      byte incomingLength = LoRa.read();    // incoming msg length
+      String incoming = "";
+      while (LoRa.available()){
+        incoming += (char)LoRa.read();
+      }
+      if (incomingLength != incoming.length()) {   // check length for error
+        Serial.println("error: message length does not match length");
+        return;                             // skip rest of function
+      }
+      // if the recipient isn't this device or broadcast,
+      if (recipient != localAddress && recipient != 0xFF) {
+        Serial.println("This message is not for me.");
+        return;                             // skip rest of function
+      }
+      // if message is for this device, or broadcast, print details:
+      Serial.println("Received from: 0x" + String(sender, HEX));
+      Serial.println("Sent to: 0x" + String(recipient, HEX));
+      Serial.println("Message ID: " + String(incomingMsgId));
+      Serial.println("Message length: " + String(incomingLength));
+      Serial.println("Message: " + incoming);
+      Serial.println("RSSI: " + String(LoRa.packetRssi()));
+      Serial.println("Snr: " + String(LoRa.packetSnr()));
+      Serial.println();      
+    }
