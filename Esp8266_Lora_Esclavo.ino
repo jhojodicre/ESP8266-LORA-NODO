@@ -1,34 +1,33 @@
 //1. librerias.
-  //********************************************************
-  #include <SPI.h>
-  #include <LoRa.h>
-  //********************************************************
+  //- 1.1 Librerias
+    //****************************
+    #include <SPI.h>
+    #include <LoRa.h>
+  
 //2. Definicion de Pinout.
   //      Las Etiquetas para los pinout son los que comienzan con GPIO
   //      Es decir, si queremos activar la salida 1, tenemos que buscar la referencia GPIO 1, Pero solomante Escribir 1 sin "GPIO"
   //      NO tomar como referencia las etiquetas D1.
   //********************************************************
-  //- 2.1 Definicion de etiquetas para las Entradas.
+  //-2.1 Definicion de etiquetas para las Entradas.
+    #define PB_ENTER 0
+  //********************************************************
+  //-2.2 Definicion de etiquetas para las Salidas.
+    #define LED_azul 2
+
+  //-2.3 RFM95 Modulo de comunicacion
+    #define RFM95_RST 16
+    #define RFM95_CS 15
+    #define RFM95_INIT 5
 
   //********************************************************
-  //    - 2.2 Definicion de etiquetas para las Salidas.
-  #define LED_azul 2
-
-  //********************************************************
-  //      - 2.3 Modulo de comunicaion rfm95
-  #define RFM95_CS 15
-  #define RFM95_INIT 5
-  #define RFM95_RST 0
-
-  //********************************************************
-  //    - 2.4. Constantes
+  //-2.4. Constantes
   #define RFM95_FREQ 915E6
   //********************************************************
 //3. Variables Globales.
+  //-3.1 Variables para las Interrupciones
   String inputString;                     // Buffer recepcion Serial.
   volatile  bool stringComplete= false;   // Flag: mensaje Serial Recibido completo.
-  //********************************************************
-  //-3.1 Variables para las Interrupciones
 
   //********************************************************
   //-3.2 Variables Globales para Las Funciones.
@@ -40,12 +39,11 @@
     bool codified_funtion=false;  // Notifica que la funcion ha sido codificada.
 
   //********************************************************
-  //-3.3 Variables para RF95
+  //-3.3 RFM95 Variables
     int16_t packetnum = 0;  // packet counter, we increment per xmission
     unsigned int placa; // placa en el perimetro.
     unsigned int zona;  // Zona del perimetro.
     char radiopacket[32] = "012345 23456789 1   ";
-
 
     int packetSize = 0;
     String outgoing;              // outgoing message
@@ -208,18 +206,7 @@ void loop(){
       
   }
 //4. Funciones de Dispositivos Externos.
-  //-4.1 RFM95_ENVIAR.
-    void RFM95_enviar(String outgoing){
-      LoRa.beginPacket();                   // start packet
-      LoRa.write(destination);              // add destination address
-      LoRa.write(localAddress);             // add sender address
-      LoRa.write(msgCount);                 // add message ID
-      LoRa.write(outgoing.length());        // add payload length
-      LoRa.print(outgoing);                 // add payload
-      LoRa.endPacket();                     // finish packet and send it
-      msgCount++;                           // increment message ID
-    }
-  //-4.2 RFM95_RECIBIR.
+  //-4.1 RFM95 RECIBIR.
     void RFM95_recibir(int packetSize){
       if (packetSize == 0) return;          // if there's no packet, return
       // read packet header bytes:
@@ -250,3 +237,16 @@ void loop(){
       Serial.println("Snr: " + String(LoRa.packetSnr()));
       Serial.println();      
     }
+  //-4.2 RFM95 ENVIAR.
+    void RFM95_enviar(String outgoing){
+      LoRa.beginPacket();                   // start packet
+      LoRa.write(destination);              // add destination address
+      LoRa.write(localAddress);             // add sender address
+      LoRa.write(msgCount);                 // add message ID
+      LoRa.write(outgoing.length());        // add payload length
+      LoRa.print(outgoing);                 // add payload
+      LoRa.endPacket();                     // finish packet and send it
+      msgCount++;                           // increment message ID
+    }
+
+    
