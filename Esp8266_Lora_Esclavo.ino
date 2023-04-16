@@ -1,18 +1,20 @@
 //1. librerias.
+
   //- 1.1 Librerias
     //****************************
     #include <SPI.h>
     #include <LoRa.h>
   
 //2. Definicion de Pinout.
-  //      Las Etiquetas para los pinout son los que comienzan con GPIO
-  //      Es decir, si queremos activar la salida 1, tenemos que buscar la referencia GPIO 1, Pero solomante Escribir 1 sin "GPIO"
-  //      NO tomar como referencia las etiquetas D1.
-  //********************************************************
+  //  Las Etiquetas para los pinout son los que comienzan con GPIO
+  //  Es decir, si queremos activar la salida 1, tenemos que buscar la referencia GPIO 1, Pero solomante Escribir 1 sin "GPIO"
+  //  NO tomar como referencia las etiquetas D1, D2,D3, ....Dx.
+  
   //-2.1 Definicion de etiquetas para las Entradas.
+    //********************************************************
     #define PB_ENTER 0
-  //********************************************************
   //-2.2 Definicion de etiquetas para las Salidas.
+    //********************************************************
     #define LED_azul 2
 
   //-2.3 RFM95 Modulo de comunicacion
@@ -20,26 +22,36 @@
     #define RFM95_CS 15
     #define RFM95_INIT 5
 
-  //********************************************************
   //-2.4. Constantes
-  #define RFM95_FREQ 915E6
-  //********************************************************
+    //********************************************************
+    #define RFM95_FREQ 915E6
+  
 //3. Variables Globales.
-  //-3.1 Variables para las Interrupciones
-  String inputString;                     // Buffer recepcion Serial.
-  volatile  bool stringComplete= false;   // Flag: mensaje Serial Recibido completo.
-
   //********************************************************
+
+  //-3.1 Variables para las Interrupciones
+    String inputString;                     // Buffer recepcion Serial.
+    volatile  bool stringComplete= false;   // Flag: mensaje Serial Recibido completo.
+  
   //-3.2 Variables Globales para Las Funciones.
+    //********************************************************
     bool inicio=true;             // Habilitar mensaje de inicio por unica vez
     String funtion_Mode;          // Tipo de funcion para ejecutar.
     String funtion_Number;        // Numero de funcion a EJECUTAR.
-    String funtion_Parmeter1;     // Parametro 1 de la Funcion;
-    String funtion_Parmeter2;     // Parametro 2 de la Funcion;
+    String funtion_Parmeter1;     // Parametro 1 de la Funcion.
+    String funtion_Parmeter2;     // Parametro 2 de la Funcion.
+    String funtion_Parmeter3;     // Parametro 3 de la Funcion.
     bool codified_funtion=false;  // Notifica que la funcion ha sido codificada.
-
-  //********************************************************
-  //-3.3 RFM95 Variables
+    int Zona_1 = 9;
+    int Zona_2 = 10;
+    int Aceptar= 2;
+    int Zonas=0;
+    volatile int x1=0;
+    volatile int x2=0;
+    volatile int x3=0;
+  
+  //-3.3 RFM95 Variables.
+    //********************************************************
     int16_t packetnum = 0;  // packet counter, we increment per xmission
     unsigned int placa; // placa en el perimetro.
     unsigned int zona;  // Zona del perimetro.
@@ -55,9 +67,9 @@
 
 //4. Intancias.
   //********************************************************
+
 //5. Funciones ISR.
-  //********************************************************
-  // 5.1 funciones de interrupcion.
+  //-5.1 Serial Function.
     void serialEvent (){
       while (Serial.available()) {
         // get the new byte:
@@ -72,7 +84,8 @@
         }
       }
     }
-void setup() {
+  //-5.2 Extern Function
+void setup(){
   //1. Configuracion de Puertos.
     //****************************
     //1.1 Configuracion de Salidas:
@@ -80,26 +93,27 @@ void setup() {
       pinMode(RFM95_RST, OUTPUT);
       pinMode(LED_azul, OUTPUT);
     //1.2 Configuracion de Entradas
-    
+      // pinMode(Zona_1, INPUT);
+      // pinMode(Zona_2, INPUT);
+      // pinMode(Aceptar, INPUT);
+
   //2. Condiciones Iniciales.
-    //****************************
-    //    2.1 Estado de Salidas.
+    //-2.1 Estado de Salidas.
       digitalWrite(LED_azul,HIGH);
       digitalWrite(RFM95_RST, HIGH);
-    //    2.2 Valores y Espacios de Variables
+    //-2.2 Valores y Espacios de Variables
   //3. Configuracion de Perifericos:
-    //****************************
     //-3.1 Initialize serial communication at 9600 bits per second:
       Serial.begin(9600);
       delay(10);
     //-3.2 Interrupciones Habilitadas.
       //****************************
+      //attachInterrupt (digitalPinToInterrupt (Aceptar), pinChange, CHANGE);  // attach interrupt handler for D2
       //interrupts ();
   //4. Prueba de Sitema Minimo Configurado.
     //****************************
     Serial.println("Sistema Minimo Configurado");
   //5. Configuracion de DEVICE externos.
-    //****************************
     //-5.1 RFM95 Configuracion.
       LoRa.setPins(RFM95_CS, RFM95_RST, RFM95_INIT);
 
@@ -117,7 +131,7 @@ void loop(){
     //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     while (inicio){
       welcome();        // Comprobamos el Sistema minimo de Funcionamiento.
-      led_Monitor(2);
+      led_Monitor(5);
     }
   //2. Decodificar funcion serial
     //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -131,8 +145,15 @@ void loop(){
       // 3.1 Desactivar Banderas.
       codified_funtion=false;
     }
-  //4. RFM95 Funciones.
-    //-4.1 RFM95 RUN.
+
+  //4. ESTADOS a enviar
+    // estados();
+    // if(!Aceptar){
+    //   inicio=true;
+    //   Zonas=0;
+    // }  
+  //5. RFM95 Funciones.
+    //-5.1 RFM95 RUN.
       RFM95_recibir(LoRa.parsePacket());
 }
 //1. Funciones de Logic interna del Micro.
@@ -185,30 +206,57 @@ void loop(){
     // Deshabilitamos Banderas
     Serial.println("hola");         // Pureba de Comunicacion Serial.
   }
-//3. Ultima Funcion.
+  void fb1_estados(){
+    int a=0;
+  }
+//3. Gestiona las funciones a Ejecutar.
   void ejecutar_solicitud(){
     // Deshabilitamos Banderas
+      x1=funtion_Parmeter1.toInt();
+      x2=funtion_Parmeter2.toInt();
+      // x3=funtion_Parmeter3.toInt();
+
     if (funtion_Number=="1"){
-      int x1=funtion_Parmeter1.toInt();
-      int x2=funtion_Parmeter2.toInt();
       Serial.println("funion Nº1");
       f1_Destellos(x1,x2);
     }
     if (funtion_Number=="2"){
       Serial.println("funion Nº2");
+      Serial.println("Hola Funcion 2");
     }
     if (funtion_Number=="3"){
       Serial.println("funion Nº3");
     }
+    if (funtion_Number=="4"){
+      Serial.println("funion Nº4");
+    }
+    if (funtion_Number=="5"){
+      Serial.println("funion Nº5");
+      RFM95_enviar("Maestro");
+    }
+    if (funtion_Number=="6"){
+      Serial.println("funion Nº6");
+    }        
     else{
       Serial.println("Ninguna Funcion");
     }
       
   }
-//4. Funciones de Dispositivos Externos.
-  //-4.1 RFM95 RECIBIR.
+//4. Funcion que Revisa estados a ser enviados.
+  //-4.1 Estados de Zonas.
+    // void estados(){
+    //   Zonas  = digitalRead(Zona_1);
+    //   Zonas += digitalRead(Zona_2);
+      
+    // }
+  //-4.2 Estados de XXXXXXX.
+
+  //-4.3 Estados de XXXXXXX
+
+//5. Funciones de Dispositivos Externos.
+  //-5.1 RFM95 RECIBIR.
     void RFM95_recibir(int packetSize){
-      if (packetSize == 0) return;          // if there's no packet, return
+      if (packetSize == 0) return;          // if there's no packet, returnº1
       // read packet header bytes:
       int recipient = LoRa.read();          // recipient address
       byte sender = LoRa.read();            // sender address
@@ -235,9 +283,11 @@ void loop(){
       Serial.println("Message: " + incoming);
       Serial.println("RSSI: " + String(LoRa.packetRssi()));
       Serial.println("Snr: " + String(LoRa.packetSnr()));
-      Serial.println();      
+      Serial.println();
+      inputString=incoming;
+      stringComplete=true;
     }
-  //-4.2 RFM95 ENVIAR.
+  //-5.2 RFM95 ENVIAR.
     void RFM95_enviar(String outgoing){
       LoRa.beginPacket();                   // start packet
       LoRa.write(destination);              // add destination address
@@ -247,6 +297,4 @@ void loop(){
       LoRa.print(outgoing);                 // add payload
       LoRa.endPacket();                     // finish packet and send it
       msgCount++;                           // increment message ID
-    }
-
-    
+    }    
