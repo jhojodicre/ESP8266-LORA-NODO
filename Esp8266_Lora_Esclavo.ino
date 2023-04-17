@@ -42,9 +42,10 @@
     String funtion_Parmeter2;     // Parametro 2 de la Funcion.
     String funtion_Parmeter3;     // Parametro 3 de la Funcion.
     bool codified_funtion=false;  // Notifica que la funcion ha sido codificada.
-    int Zona_1 = 9;
+    int Zona_1 = 4;
     int Zona_2 = 10;
-    int Aceptar= 2;
+    int Zona_3 = 9;
+    int Aceptar= 0;
     int Zonas=0;
     volatile int x1=0;
     volatile int x2=0;
@@ -93,15 +94,18 @@ void setup(){
       pinMode(RFM95_RST, OUTPUT);
       pinMode(LED_azul, OUTPUT);
     //1.2 Configuracion de Entradas
-      // pinMode(Zona_1, INPUT);
-      // pinMode(Zona_2, INPUT);
-      // pinMode(Aceptar, INPUT);
+      pinMode(Zona_1, INPUT_PULLUP);
+      pinMode(Zona_2, INPUT_PULLUP);
+      pinMode(Zona_3, INPUT_PULLUP);
+      pinMode(Aceptar, INPUT_PULLUP);
 
   //2. Condiciones Iniciales.
     //-2.1 Estado de Salidas.
       digitalWrite(LED_azul,HIGH);
       digitalWrite(RFM95_RST, HIGH);
     //-2.2 Valores y Espacios de Variables
+      // digitalWrite(Zona_1,HIGH);
+      // digitalWrite(Aceptar,HIGH);
   //3. Configuracion de Perifericos:
     //-3.1 Initialize serial communication at 9600 bits per second:
       Serial.begin(9600);
@@ -139,19 +143,16 @@ void loop(){
       decodificar_solicitud();
     }
   //3. Ejecutar Funcion
-    //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    if(codified_funtion){
-      ejecutar_solicitud();
-      // 3.1 Desactivar Banderas.
-      codified_funtion=false;
-    }
-
-  //4. ESTADOS a enviar
-    // estados();
-    // if(!Aceptar){
-    //   inicio=true;
-    //   Zonas=0;
-    // }  
+    //-3.1 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      if(codified_funtion){
+        ejecutar_solicitud();
+        // 3.1 Desactivar Banderas.
+        codified_funtion=false;
+      }
+    //-3.2 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      if(!digitalRead(Aceptar)){
+        inicio=true;
+      }
   //5. RFM95 Funciones.
     //-5.1 RFM95 RUN.
       RFM95_recibir(LoRa.parsePacket());
@@ -167,7 +168,7 @@ void loop(){
   void led_Monitor(int repeticiones){
     // Deshabilitamos Banderas
     int repetir=repeticiones;
-    for (int encender=0; encender<=repetir; ++encender){
+    for (int encender=0; encender<repetir; ++encender){
       digitalWrite(LED_azul, LOW);   // Led ON.
       delay(500);                    // pausa 1 seg.
       digitalWrite(LED_azul, HIGH);    // Led OFF.
@@ -187,56 +188,124 @@ void loop(){
     Serial.println("funcion: " + funtion_Mode);
     Serial.println("Numero: " + funtion_Number);
     Serial.println("Parametro1: " + funtion_Parmeter1);
-    Serial.println("Parametro2: " + funtion_Parmeter2+ "\n");
-    //Serial.println("Numero de funcion: ")
+    Serial.println("Parametro2: " + funtion_Parmeter2);
+    Serial.println("Parametro3: " + funtion_Parmeter3+ "\n");
   }
 //2. Funciones Seleccionadas para Ejecutar.
-  void f1_Destellos (int repeticiones, int tiempo){
-    int veces=repeticiones;
-    int retardo=tiempo*100;
-    Serial.println("Ejecutando F1.. \n");
-    for(int repetir=0; repetir<veces; ++repetir){
-      delay(retardo);                  // pausa 1 seg.
-      digitalWrite(LED_azul, LOW);     // Led ON.
-      delay(retardo);                  // pausa 1 seg.
-      digitalWrite(LED_azul, HIGH);    // Led OFF.
+  //-2.1 Funciones Tipo A.
+    void f1_Destellos (int repeticiones, int tiempo){
+      int veces=repeticiones;
+      int retardo=tiempo*100;
+      Serial.println("Ejecutando F1.. \n");
+      for(int repetir=0; repetir<veces; ++repetir){
+        delay(retardo);                  // pausa 1 seg.
+        digitalWrite(LED_azul, LOW);     // Led ON.
+        delay(retardo);                  // pausa 1 seg.
+        digitalWrite(LED_azul, HIGH);    // Led OFF.
+      }
     }
-  }
-  void f2_serial_Enviar(int direccion, int buffer){
-    // Deshabilitamos Banderas
-    Serial.println("hola");         // Pureba de Comunicacion Serial.
-  }
-  void fb1_estados(){
-    int a=0;
-  }
+    void f2_serial_Enviar(int direccion, int buffer){
+      // Deshabilitamos Banderas
+      Serial.println("hola");         // Pureba de Comunicacion Serial.
+    }
+  //-2.2 Funciones tipo B.
+    void fb1_estados(){
+      int a=0;
+    }
+    void fb2 (int a1, int a2){
+      int aa=a1;
+      int aa2=a2;
+    }
+      void fb3 (int a1, int a2){
+      int aa=a1;
+      int aa2=a2;
+    }
+      void fb4 (int a1, int a2){
+      int aa=a1;
+      int aa2=a2;
+    }
+      void fb5 (int a1, int a2){
+      int aa=a1;
+      int aa2=a2;
+    }
+      void fb6 (int a1, int a2){
+      int aa=a1;
+      int aa2=a2;
+    }
 //3. Gestiona las funciones a Ejecutar.
   void ejecutar_solicitud(){
     // Deshabilitamos Banderas
       x1=funtion_Parmeter1.toInt();
       x2=funtion_Parmeter2.toInt();
-      // x3=funtion_Parmeter3.toInt();
-
-    if (funtion_Number=="1"){
-      Serial.println("funion Nº1");
-      f1_Destellos(x1,x2);
-    }
-    if (funtion_Number=="2"){
-      Serial.println("funion Nº2");
-      Serial.println("Hola Funcion 2");
-    }
-    if (funtion_Number=="3"){
-      Serial.println("funion Nº3");
-    }
-    if (funtion_Number=="4"){
-      Serial.println("funion Nº4");
-    }
-    if (funtion_Number=="5"){
-      Serial.println("funion Nº5");
-      RFM95_enviar("Maestro");
-    }
-    if (funtion_Number=="6"){
-      Serial.println("funion Nº6");
-    }        
+      x3=funtion_Parmeter3.toInt();
+    // Function Tipo A
+      if (funtion_Mode=="A" && funtion_Number=="1"){
+        Serial.println("funion A Nº1");
+        f1_Destellos(x1,x2);
+      }
+      if (funtion_Mode=="A" && funtion_Number=="2"){
+        Serial.println("funion A Nº2");
+        Serial.println("Hola Funcion 2");
+      }
+      if (funtion_Mode=="A" && funtion_Number=="3"){
+        Serial.println("funion A Nº3");
+      }
+      if (funtion_Mode=="A" && funtion_Number=="4"){
+        Serial.println("funion A Nº4");
+      }
+      if (funtion_Mode=="A" && funtion_Number=="5"){
+        Serial.println("funion A Nº5");
+        RFM95_enviar("Maestro");
+      }
+      if (funtion_Mode=="A" && funtion_Number=="6"){
+        Serial.println("funion A Nº6");
+      }        
+      if (funtion_Mode=="A" && funtion_Number=="7"){
+        Serial.println("funion A Nº7");
+      }
+      if (funtion_Mode=="A" && funtion_Number=="8"){
+        Serial.println("funion A Nº8");
+      }     
+      if (funtion_Mode=="A" && funtion_Number=="9"){
+        Serial.println("funion A Nº9");
+      }     
+      if (funtion_Mode=="A" && funtion_Number=="0"){
+        Serial.println("funion A Nº0");
+      }                      
+    // Function Tipo B
+      if (funtion_Mode=="B" && funtion_Number=="1"){
+        Serial.println("funion B Nº1");
+        fb1_estados();
+      }
+      if (funtion_Mode=="B" && funtion_Number=="2"){
+        Serial.println("funion B Nº2");
+        Serial.println("Hola Funcion 2");
+      }
+      if (funtion_Mode=="B" && funtion_Number=="3"){
+        Serial.println("funion B Nº3");
+      }
+      if (funtion_Mode=="B" && funtion_Number=="4"){
+        Serial.println("funion B Nº4");
+      }
+      if (funtion_Mode=="B" && funtion_Number=="5"){
+        Serial.println("funion B Nº5");
+        RFM95_enviar("Maestro");
+      }
+      if (funtion_Mode=="B" && funtion_Number=="6"){
+        Serial.println("funion B Nº6");
+      }        
+      if (funtion_Mode=="B" && funtion_Number=="7"){
+        Serial.println("funion B Nº7");
+      }
+      if (funtion_Mode=="B" && funtion_Number=="8"){
+        Serial.println("funion B Nº8");
+      }     
+      if (funtion_Mode=="B" && funtion_Number=="9"){
+        Serial.println("funion B Nº9");
+      }     
+      if (funtion_Mode=="B" && funtion_Number=="0"){
+        Serial.println("funion B Nº0");
+      }                            
     else{
       Serial.println("Ninguna Funcion");
     }
