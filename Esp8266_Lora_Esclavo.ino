@@ -42,6 +42,7 @@
     String funtion_Parmeter2;     // Parametro 2 de la Funcion.
     String funtion_Parmeter3;     // Parametro 3 de la Funcion.
     bool codified_funtion=false;  // Notifica que la funcion ha sido codificada.
+    // Variables Para la Placa.
     int Zona_1 = 4;
     int Zona_2 = 10;
     int Zona_3 = 9;
@@ -56,7 +57,7 @@
     byte incomingMsgId;     // incoming msg ID
     byte incomingLength;    // incoming msg length
     String incoming = "";
-    String Nodo ="01";
+    String Nodo ="1";
     bool responder=false;
   //-3.3 RFM95 Variables.
     //********************************************************
@@ -111,8 +112,7 @@ void setup(){
       digitalWrite(LED_azul,HIGH);
       digitalWrite(RFM95_RST, HIGH);
     //-2.2 Valores y Espacios de Variables
-      // digitalWrite(Zona_1,HIGH);
-      // digitalWrite(Aceptar,HIGH);
+      sender=String(Nodo).toInt();
   //3. Configuracion de Perifericos:
     //-3.1 Initialize serial communication at 9600 bits per second:
       Serial.begin(9600);
