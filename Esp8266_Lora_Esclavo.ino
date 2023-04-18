@@ -47,10 +47,17 @@
     int Zona_3 = 9;
     int Aceptar= 0;
     int Zonas=0;
+    String Compañeros="0";
     volatile int x1=0;
     volatile int x2=0;
     volatile int x3=0;
-  
+    int recipient;          // recipient address
+    byte sender;            // sender address
+    byte incomingMsgId;     // incoming msg ID
+    byte incomingLength;    // incoming msg length
+    String incoming = "";
+    String Nodo ="01";
+    bool responder=false;
   //-3.3 RFM95 Variables.
     //********************************************************
     int16_t packetnum = 0;  // packet counter, we increment per xmission
@@ -153,17 +160,25 @@ void loop(){
       if(!digitalRead(Aceptar)){
         inicio=true;
       }
+    //-3.3 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      reviso();
   //5. RFM95 Funciones.
     //-5.1 RFM95 RUN.
       RFM95_recibir(LoRa.parsePacket());
+
+    //-5.2 Responsde si el mensaje es para él.
+      if(responder){
+        RFM95_enviar(Nodo+Compañeros+char(Zonas));
+      }
+      
 }
 //1. Funciones de Logic interna del Micro.
   void welcome(){
     // Deshabilitamos Banderas
       inicio=false;
-      Serial.println("Comenzamos el Programa");
-      Serial.println("Esperamos recibir un Dato");
-      Serial.println("ESP8266 ESCLAVO CONFIGURADO");
+      Serial.println("Sistema Iniciado");
+      Serial.println("Nodo: "+Nodo+" Ready");
+      
   }
   void led_Monitor(int repeticiones){
     // Deshabilitamos Banderas
@@ -208,6 +223,12 @@ void loop(){
       // Deshabilitamos Banderas
       Serial.println("hola");         // Pureba de Comunicacion Serial.
     }
+    void f3_set_Nodo(){
+      // Deshabilitamos Banderas
+      Nodo=funtion_Parmeter1+funtion_Parmeter2;
+      Serial.println("Nodo:"+ Nodo + "Configurado Exitosamente");         // Pureba de Comunicacion Serial.
+    }
+
   //-2.2 Funciones tipo B.
     void fb1_estados(){
       int a=0;
@@ -216,19 +237,19 @@ void loop(){
       int aa=a1;
       int aa2=a2;
     }
-      void fb3 (int a1, int a2){
+    void fb3 (int a1, int a2){
       int aa=a1;
       int aa2=a2;
     }
-      void fb4 (int a1, int a2){
+    void fb4 (int a1, int a2){
       int aa=a1;
       int aa2=a2;
     }
-      void fb5 (int a1, int a2){
+    void fb5 (int a1, int a2){
       int aa=a1;
       int aa2=a2;
     }
-      void fb6 (int a1, int a2){
+    void fb6 (int a1, int a2){
       int aa=a1;
       int aa2=a2;
     }
@@ -313,25 +334,23 @@ void loop(){
   }
 //4. Funcion que Revisa estados a ser enviados.
   //-4.1 Estados de Zonas.
-    // void estados(){
-    //   Zonas  = digitalRead(Zona_1);
-    //   Zonas += digitalRead(Zona_2);
+    void reviso(){
+      Zonas  = (char)digitalRead(Zona_1);
+      Zonas += (char)digitalRead(Zona_2);
       
-    // }
-  //-4.2 Estados de XXXXXXX.
-
-  //-4.3 Estados de XXXXXXX
+    }
 
 //5. Funciones de Dispositivos Externos.
   //-5.1 RFM95 RECIBIR.
     void RFM95_recibir(int packetSize){
       if (packetSize == 0) return;          // if there's no packet, returnº1
       // read packet header bytes:
-      int recipient = LoRa.read();          // recipient address
-      byte sender = LoRa.read();            // sender address
-      byte incomingMsgId = LoRa.read();     // incoming msg ID
-      byte incomingLength = LoRa.read();    // incoming msg length
-      String incoming = "";
+      recipient = LoRa.read();          // recipient address
+      sender = LoRa.read();            // sender address
+      incomingMsgId = LoRa.read();     // incoming msg ID
+      incomingLength = LoRa.read();    // incoming msg length
+      incoming = "";
+
       while (LoRa.available()){
         incoming += (char)LoRa.read();
       }
@@ -353,8 +372,14 @@ void loop(){
       Serial.println("RSSI: " + String(LoRa.packetRssi()));
       Serial.println("Snr: " + String(LoRa.packetSnr()));
       Serial.println();
-      inputString=incoming;
-      stringComplete=true;
+
+    // Verificamos que el mensaje que nos llega sea para nosotros
+      if(String(recipient)==Nodo){
+        inputString=incoming;
+        stringComplete=true;
+        responder=true;
+      }
+
     }
   //-5.2 RFM95 ENVIAR.
     void RFM95_enviar(String outgoing){
