@@ -168,7 +168,10 @@ void loop(){
 
     //-5.2 Responsde si el mensaje es para él.
       if(responder){
-        RFM95_enviar(Nodo+Compañeros+char(Zonas));
+        destination=sender;                           // add destination address.
+        localAddress=String(Nodo).toInt();            // add sender address.
+        // msgCount=1;                                   // add message ID.
+        RFM95_enviar(Compañeros+char(Zonas));
       }
       
 }
@@ -360,8 +363,9 @@ void loop(){
       }
       // if the recipient isn't this device or broadcast,
       if (recipient != localAddress && recipient != 0xFF) {
+        Serial.println("Sent to: 0x" + String(recipient, HEX));
         Serial.println("This message is not for me.");
-        return;                             // skip rest of function
+        // return;                             // skip rest of function
       }
       // if message is for this device, or broadcast, print details:
       Serial.println("Received from: 0x" + String(sender, HEX));
@@ -390,5 +394,6 @@ void loop(){
       LoRa.write(outgoing.length());        // add payload length
       LoRa.print(outgoing);                 // add payload
       LoRa.endPacket();                     // finish packet and send it
-      msgCount++;                           // increment message ID
+      msgCount++;                           // increment message ID.
+      responder=false;
     }    
