@@ -234,6 +234,7 @@ void loop(){
       // Deshabilitamos Banderas
       Nodo=funtion_Parmeter1+funtion_Parmeter2;
       Serial.println("Nodo:"+ Nodo + "Configurado Exitosamente");         // Pureba de Comunicacion Serial.
+    }
     void a2_Nodo_Serial_Enviar(int direccion, int buffer){
       // Deshabilitamos Banderas
       Serial.println("hola");         // Pureba de Comunicacion Serial.
@@ -325,7 +326,7 @@ void loop(){
     // Function Tipo B
       if (funtion_Mode=="B" && funtion_Number=="1"){
         Serial.println("funion B Nº1");
-        fb1_estados();
+        b1_estados();
       }
       if (funtion_Mode=="B" && funtion_Number=="2"){
         Serial.println("funion B Nº2");
