@@ -52,13 +52,10 @@
     volatile int x1=0;
     volatile int x2=0;
     volatile int x3=0;
-    int recipient;          // recipient address
-    byte sender;            // sender address
-    byte incomingMsgId;     // incoming msg ID
-    byte incomingLength;    // incoming msg length
-    String incoming = "";
+
     String Nodo ="1";
     bool responder=false;
+    int Nodos = 2;         // Establece Cuantos Nodos Conforman La Red a6
   //-3.3 RFM95 Variables.
     //********************************************************
     int16_t packetnum = 0;  // packet counter, we increment per xmission
@@ -66,14 +63,21 @@
     unsigned int zona;  // Zona del perimetro.
     char radiopacket[32] = "012345 23456789 1   ";
 
+    // Variables para enviar.
     int packetSize = 0;
     String outgoing;              // outgoing message
     byte msgCount = 0;            // count of outgoing messages
-    byte localAddress = 0x01;     // address of this device
-    byte destination = 0xFF;      // destination to send to
+    byte localAddress = 0x01;     // address of this device           a3
+    byte destination = 0xFF;      // destination to send to           a4
     long lastSendTime = 0;        // last send time
     int interval = 2000;          // interval between sends.
 
+    // Variables para recibir.
+    int recipient;          // recipient address
+    byte sender;            // sender address
+    byte incomingMsgId;     // incoming msg ID
+    byte incomingLength;    // incoming msg length
+    String incoming = "";
 //4. Intancias.
   //********************************************************
 
@@ -112,7 +116,7 @@ void setup(){
       digitalWrite(LED_azul,HIGH);
       digitalWrite(RFM95_RST, HIGH);
     //-2.2 Valores y Espacios de Variables
-      sender=String(Nodo).toInt();
+      //sender=String(Nodo).toInt();
   //3. Configuracion de Perifericos:
     //-3.1 Initialize serial communication at 9600 bits per second:
       Serial.begin(9600);
@@ -211,7 +215,11 @@ void loop(){
   }
 //2. Funciones Seleccionadas para Ejecutar.
   //-2.1 Funciones Tipo A.
+<<<<<<< HEAD
     void a1_Destellos (int repeticiones, int tiempo){
+=======
+    void a1_Nodo_Destellos (int repeticiones, int tiempo){
+>>>>>>> a4171f1545c26f69b888a28a3a9b72b442b6f2f6
       int veces=repeticiones;
       int retardo=tiempo*100;
       Serial.println("Ejecutando F1.. \n");
@@ -222,6 +230,7 @@ void loop(){
         digitalWrite(LED_azul, HIGH);    // Led OFF.
       }
     }
+<<<<<<< HEAD
     void a2_Serial_Enviar(int direccion, int buffer){
       // Deshabilitamos Banderas
       Serial.println("hola");         // Pureba de Comunicacion Serial.
@@ -230,6 +239,24 @@ void loop(){
       // Deshabilitamos Banderas
       Nodo=funtion_Parmeter1+funtion_Parmeter2;
       Serial.println("Nodo:"+ Nodo + "Configurado Exitosamente");         // Pureba de Comunicacion Serial.
+=======
+    void a2_Nodo_Serial_Enviar(int direccion, int buffer){
+      // Deshabilitamos Banderas
+      Serial.println("hola");         // Pureba de Comunicacion Serial.
+    }
+    void a3_Nodo_Direccion_Local(int paramatro_1){
+      localAddress = paramatro_1;
+
+    }
+    void a4_Nodo_Direccion_Destino(int direccion_aux){
+      destination = direccion_aux;
+    }
+    void a5_Nodo_Mensaje_ID(){      
+      msgCount++;                           // increment message ID.
+    }
+    void a6_Nodo_Numeros(int parametro_1){
+      Nodos=parametro_1;
+>>>>>>> a4171f1545c26f69b888a28a3a9b72b442b6f2f6
     }
 
   //-2.2 Funciones tipo B.
@@ -265,7 +292,7 @@ void loop(){
     // Function Tipo A
       if (funtion_Mode=="A" && funtion_Number=="1"){
         Serial.println("funion A Nº1");
-        f1_Destellos(x1,x2);
+        a1_Nodo_Destellos(x1,x2);
       }
       if (funtion_Mode=="A" && funtion_Number=="2"){
         Serial.println("funion A Nº2");
@@ -273,6 +300,9 @@ void loop(){
       }
       if (funtion_Mode=="A" && funtion_Number=="3"){
         Serial.println("funion A Nº3");
+        String Nodo_direccion_aux = funtion_Parmeter1+funtion_Parmeter2;
+        int Nodo_direccion = Nodo_direccion_aux.toInt();
+        a3_Nodo_Direccion_Local(Nodo_direccion);
       }
       if (funtion_Mode=="A" && funtion_Number=="4"){
         Serial.println("funion A Nº4");
@@ -282,20 +312,23 @@ void loop(){
         RFM95_enviar("Maestro");
       }
       if (funtion_Mode=="A" && funtion_Number=="6"){
-        Serial.println("funion A Nº6");
-      }        
+        Serial.println("funion A Nº6: Numero de Nodos");
+        String Nodos_numeros_aux = funtion_Parmeter1+funtion_Parmeter2;
+        int Nodos_numeros = Nodos_numeros_aux.toInt();
+        a6_Nodo_Numeros(Nodos_numeros);
+      }
       if (funtion_Mode=="A" && funtion_Number=="7"){
         Serial.println("funion A Nº7");
       }
       if (funtion_Mode=="A" && funtion_Number=="8"){
         Serial.println("funion A Nº8");
-      }     
+      }
       if (funtion_Mode=="A" && funtion_Number=="9"){
         Serial.println("funion A Nº9");
-      }     
+      }
       if (funtion_Mode=="A" && funtion_Number=="0"){
         Serial.println("funion A Nº0");
-      }                      
+      }
     // Function Tipo B
       if (funtion_Mode=="B" && funtion_Number=="1"){
         Serial.println("funion B Nº1");
@@ -348,7 +381,7 @@ void loop(){
     void RFM95_recibir(int packetSize){
       if (packetSize == 0) return;          // if there's no packet, returnº1
       // read packet header bytes:
-      recipient = LoRa.read();          // recipient address
+      recipient = LoRa.read();         // recipient address
       sender = LoRa.read();            // sender address
       incomingMsgId = LoRa.read();     // incoming msg ID
       incomingLength = LoRa.read();    // incoming msg length
@@ -365,7 +398,7 @@ void loop(){
       if (recipient != localAddress && recipient != 0xFF) {
         Serial.println("Sent to: 0x" + String(recipient, HEX));
         Serial.println("This message is not for me.");
-        // return;                             // skip rest of function
+        return;                             // skip rest of function
       }
       // if message is for this device, or broadcast, print details:
       Serial.println("Received from: 0x" + String(sender, HEX));
@@ -377,7 +410,7 @@ void loop(){
       Serial.println("Snr: " + String(LoRa.packetSnr()));
       Serial.println();
 
-    // Verificamos que el mensaje que nos llega sea para nosotros
+      //Verificamos que el mensaje que nos llega sea para nosotros
       if(String(recipient)==Nodo){
         inputString=incoming;
         stringComplete=true;
@@ -394,6 +427,5 @@ void loop(){
       LoRa.write(outgoing.length());        // add payload length
       LoRa.print(outgoing);                 // add payload
       LoRa.endPacket();                     // finish packet and send it
-      msgCount++;                           // increment message ID.
       responder=false;
     }    
