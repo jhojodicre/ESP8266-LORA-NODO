@@ -215,11 +215,7 @@ void loop(){
   }
 //2. Funciones Seleccionadas para Ejecutar.
   //-2.1 Funciones Tipo A.
-<<<<<<< HEAD
-    void a1_Destellos (int repeticiones, int tiempo){
-=======
     void a1_Nodo_Destellos (int repeticiones, int tiempo){
->>>>>>> a4171f1545c26f69b888a28a3a9b72b442b6f2f6
       int veces=repeticiones;
       int retardo=tiempo*100;
       Serial.println("Ejecutando F1.. \n");
@@ -230,7 +226,6 @@ void loop(){
         digitalWrite(LED_azul, HIGH);    // Led OFF.
       }
     }
-<<<<<<< HEAD
     void a2_Serial_Enviar(int direccion, int buffer){
       // Deshabilitamos Banderas
       Serial.println("hola");         // Pureba de Comunicacion Serial.
@@ -239,7 +234,6 @@ void loop(){
       // Deshabilitamos Banderas
       Nodo=funtion_Parmeter1+funtion_Parmeter2;
       Serial.println("Nodo:"+ Nodo + "Configurado Exitosamente");         // Pureba de Comunicacion Serial.
-=======
     void a2_Nodo_Serial_Enviar(int direccion, int buffer){
       // Deshabilitamos Banderas
       Serial.println("hola");         // Pureba de Comunicacion Serial.
@@ -256,7 +250,6 @@ void loop(){
     }
     void a6_Nodo_Numeros(int parametro_1){
       Nodos=parametro_1;
->>>>>>> a4171f1545c26f69b888a28a3a9b72b442b6f2f6
     }
 
   //-2.2 Funciones tipo B.
