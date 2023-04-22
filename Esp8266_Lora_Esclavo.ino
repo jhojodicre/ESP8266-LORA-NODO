@@ -242,6 +242,7 @@ void loop(){
     }
     void a6_Nodo_Numeros(int parametro_1){
       Nodos=parametro_1;
+      
     }
 
   //-2.2 Funciones tipo B.
