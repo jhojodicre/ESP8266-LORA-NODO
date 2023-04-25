@@ -66,7 +66,8 @@
     // Variables para enviar.
     int packetSize = 0;
     String outgoing;              // outgoing message
-    byte msgCount = 0;            // count of outgoing messages
+    byte msgCount1 = 0;            // count of outgoing messages
+    byte msgCount2 = 0;            // count of outgoing messages
     byte localAddress = 0x01;     // address of this device           a3
     byte destination = 0xFF;      // destination to send to           a4
     long lastSendTime = 0;        // last send time
@@ -234,6 +235,7 @@ void loop(){
       // Deshabilitamos Banderas
       Nodo=funtion_Parmeter1+funtion_Parmeter2;
       Serial.println("Nodo:"+ Nodo + "Configurado Exitosamente");         // Pureba de Comunicacion Serial.
+    }
     void a2_Nodo_Serial_Enviar(int direccion, int buffer){
       // Deshabilitamos Banderas
       Serial.println("hola");         // Pureba de Comunicacion Serial.
@@ -246,7 +248,7 @@ void loop(){
       destination = direccion_aux;
     }
     void a5_Nodo_Mensaje_ID(){      
-      msgCount++;                           // increment message ID.
+      msgCount1++;                           // increment message ID.
     }
     void a6_Nodo_Numeros(int parametro_1){
       Nodos=parametro_1;
@@ -326,7 +328,7 @@ void loop(){
     // Function Tipo B
       if (funtion_Mode=="B" && funtion_Number=="1"){
         Serial.println("funion B Nº1");
-        fb1_estados();
+        b1_estados();
       }
       if (funtion_Mode=="B" && funtion_Number=="2"){
         Serial.println("funion B Nº2");
@@ -417,7 +419,8 @@ void loop(){
       LoRa.beginPacket();                   // start packet
       LoRa.write(destination);              // add destination address
       LoRa.write(localAddress);             // add sender address
-      LoRa.write(msgCount);                 // add message ID
+      LoRa.write(msgCount1);                 // add message ID
+      LoRa.write(msgCount2);                 // add message ID
       LoRa.write(outgoing.length());        // add payload length
       LoRa.print(outgoing);                 // add payload
       LoRa.endPacket();                     // finish packet and send it
