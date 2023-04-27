@@ -66,8 +66,8 @@
     // Variables para enviar.
     int packetSize = 0;
     String outgoing;              // outgoing message
-    byte msgCount1 = 0;            // count of outgoing messages
-    byte msgCount2 = 0;            // count of outgoing messages
+    byte msg1_Write = 0;            // count of outgoing messages
+    byte msg2_Write = 0;            // count of outgoing messages
     byte localAddress = 0x01;     // address of this device           a3
     byte destination = 0xFF;      // destination to send to           a4
     long lastSendTime = 0;        // last send time
@@ -76,7 +76,8 @@
     // Variables para recibir.
     int recipient;          // recipient address
     byte sender;            // sender address
-    byte incomingMsgId;     // incoming msg ID
+    byte incomingMsgId1;     // incoming msg ID
+    byte incomingMsgId2;     // incoming msg ID
     byte incomingLength;    // incoming msg length
     String incoming = "";
 //4. Intancias.
@@ -248,7 +249,7 @@ void loop(){
       destination = direccion_aux;
     }
     void a5_Nodo_Mensaje_ID(){      
-      msgCount1++;                           // increment message ID.
+      msg1_Write++;                           // increment message ID.
     }
     void a6_Nodo_Numeros(int parametro_1){
       Nodos=parametro_1;
@@ -256,16 +257,17 @@ void loop(){
     }
 
   //-2.2 Funciones tipo B.
-    void b1_estados(){
-      int a=0;
+    void b1_Quien_envia(){
+      bitSet(msg1_Write, sender);
+      msg1_Write=0;
     }
-    void b2 (int a1, int a2){
+    void b2_Preparo_informacion_propia (int a1, int a2){
       int aa=a1;
       int aa2=a2;
     }
-    void b3 (int a1, int a2){
-      int aa=a1;
-      int aa2=a2;
+    void b3_info_recibida (){
+      msg1_Write=incomingMsgId1;
+      msg2_Write=incomingMsgId2;
     }
     void b4 (int a1, int a2){
       int aa=a1;
@@ -379,7 +381,8 @@ void loop(){
       // read packet header bytes:
       recipient = LoRa.read();         // recipient address
       sender = LoRa.read();            // sender address
-      incomingMsgId = LoRa.read();     // incoming msg ID
+      incomingMsgId1 = LoRa.read();     // incoming msg ID
+      incomingMsgId2 = LoRa.read();     // incoming msg ID
       incomingLength = LoRa.read();    // incoming msg length
       incoming = "";
 
@@ -399,7 +402,8 @@ void loop(){
       // if message is for this device, or broadcast, print details:
       Serial.println("Received from: 0x" + String(sender, HEX));
       Serial.println("Sent to: 0x" + String(recipient, HEX));
-      Serial.println("Message ID: " + String(incomingMsgId));
+      Serial.println("Message ID1: " + String(incomingMsgId1));
+      Serial.println("Message ID2: " + String(incomingMsgId2));
       Serial.println("Message length: " + String(incomingLength));
       Serial.println("Message: " + incoming);
       Serial.println("RSSI: " + String(LoRa.packetRssi()));
@@ -419,8 +423,8 @@ void loop(){
       LoRa.beginPacket();                   // start packet
       LoRa.write(destination);              // add destination address
       LoRa.write(localAddress);             // add sender address
-      LoRa.write(msgCount1);                 // add message ID
-      LoRa.write(msgCount2);                 // add message ID
+      LoRa.write(msg1_Write);                 // add message ID
+      LoRa.write(msg2_Write);                 // add message ID
       LoRa.write(outgoing.length());        // add payload length
       LoRa.print(outgoing);                 // add payload
       LoRa.endPacket();                     // finish packet and send it
