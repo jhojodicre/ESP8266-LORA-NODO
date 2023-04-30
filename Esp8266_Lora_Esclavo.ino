@@ -43,20 +43,20 @@
     String funtion_Parmeter3;     // Parametro 3 de la Funcion.
     bool codified_funtion=false;  // Notifica que la funcion ha sido codificada.
     // Variables Para la Placa.
-    int Zona_1 = 4;
-    int Zona_2 = 10;
-    int Zona_3 = 9;
-    int Aceptar= 0;
-    int Zonas=0;
-    String Compañeros="0";
-    volatile int x1=0;
-    volatile int x2=0;
-    volatile int x3=0;
+      int Zona_1 = 4;
+      int Zona_2 = 10;
+      int Zona_3 = 9;
+      int Aceptar= 0;
+      int Zonas=0;
+      String Compañeros="0";
+      volatile int x1=0;
+      volatile int x2=0;
+      volatile int x3=0;
 
-    String Nodo ="1";
-    bool responder=false;
-    int Nodos = 2;         // Establece Cuantos Nodos Conforman La Red a6.
-    byte Nodo_info=0;
+      String Nodo ="1";
+      bool responder=false;
+      int Nodos = 2;         // Establece Cuantos Nodos Conforman La Red a6.
+      byte Nodo_info=0;
   //-3.3 RFM95 Variables.
     //********************************************************
     int16_t packetnum = 0;  // packet counter, we increment per xmission
@@ -65,22 +65,22 @@
     char radiopacket[32] = "012345 23456789 1   ";
 
     // Variables para enviar.
-    int packetSize = 0;
-    String outgoing;              // outgoing message
-    byte msg1_Write = 0;            // count of outgoing messages
-    byte msg2_Write = 0;            // count of outgoing messages
-    byte localAddress = 0x01;     // address of this device           a3
-    byte destination = 0xFF;      // destination to send to           a4
-    long lastSendTime = 0;        // last send time
-    int interval = 2000;          // interval between sends.
+      int packetSize = 0;
+      String outgoing;              // outgoing message
+      byte msg1_Write = 0;            // count of outgoing messages
+      byte msg2_Write = 0;            // count of outgoing messages
+      byte localAddress = 0x01;     // address of this device           a3
+      byte destination = 0xFF;      // destination to send to           a4
+      long lastSendTime = 0;        // last send time
+      int interval = 2000;          // interval between sends.
 
     // Variables para recibir.
-    int recipient;          // recipient address
-    byte sender;            // sender address
-    byte incomingMsgId1;     // incoming msg ID
-    byte incomingMsgId2;     // incoming msg ID
-    byte incomingLength;    // incoming msg length
-    String incoming = "";
+      int recipient;          // recipient address
+      byte sender;            // sender address
+      byte incomingMsgId1;     // incoming msg ID
+      byte incomingMsgId2;     // incoming msg ID
+      byte incomingLength;    // incoming msg length
+      String incoming = "";
 //4. Intancias.
   //********************************************************
 
@@ -258,16 +258,17 @@ void loop(){
     }
 
   //-2.2 Funciones tipo B.
-    void b1_Quien_envia(){
+    // Identifico quien Envia el Mensaje Byte
+    void b1(){
       bitSet(msg1_Write, sender);
-      msg1_Write=0;
+      msg2_Write=0;
     }
-    void b2_Preparo_informacion_propia (int a1, int a2){
+    void b2 (int a1, int a2){
       // Byte 7
       bitSet(Nodo_info,0);
       int aa2=a2;
     }
-    void b3_info_recibida (){
+    void b3 (){
       msg1_Write=incomingMsgId1;
       msg2_Write=incomingMsgId2;
     }
@@ -331,37 +332,44 @@ void loop(){
       }
     // Function Tipo B
       if (funtion_Mode=="B" && funtion_Number=="1"){
-        Serial.println("funion B Nº1");
-        // b1_estados();
+        Serial.println("funion B Nº1: Quien envia?");
+        b1();
       }
       if (funtion_Mode=="B" && funtion_Number=="2"){
-        Serial.println("funion B Nº2");
-        Serial.println("Hola Funcion 2");
+        Serial.println("funion B Nº2: Preparo informacion propia");
+        b2_Preparo_informacion_propia();
       }
       if (funtion_Mode=="B" && funtion_Number=="3"){
-        Serial.println("funion B Nº3");
+        Serial.println("funion B Nº3:  info recibida ");
+        b3();
       }
       if (funtion_Mode=="B" && funtion_Number=="4"){
         Serial.println("funion B Nº4");
+        b4(1,1);
       }
       if (funtion_Mode=="B" && funtion_Number=="5"){
         Serial.println("funion B Nº5");
-        RFM95_enviar("Maestro");
+        b5(1,1);
       }
       if (funtion_Mode=="B" && funtion_Number=="6"){
         Serial.println("funion B Nº6");
+        b6(1,1);
       }        
       if (funtion_Mode=="B" && funtion_Number=="7"){
         Serial.println("funion B Nº7");
+        b7(1,1);
       }
       if (funtion_Mode=="B" && funtion_Number=="8"){
         Serial.println("funion B Nº8");
+        b8(1,1);
       }     
       if (funtion_Mode=="B" && funtion_Number=="9"){
         Serial.println("funion B Nº9");
+        b9(1,1);
       }     
       if (funtion_Mode=="B" && funtion_Number=="0"){
         Serial.println("funion B Nº0");
+        b0(1,1);
       }                            
     else{
       Serial.println("Ninguna Funcion");
@@ -373,7 +381,6 @@ void loop(){
     void reviso(){
       Zonas  = (char)digitalRead(Zona_1);
       Zonas += (char)digitalRead(Zona_2);
-      
     }
 
 //5. Funciones de Dispositivos Externos.
