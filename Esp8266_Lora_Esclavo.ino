@@ -55,7 +55,8 @@
 
     String Nodo ="1";
     bool responder=false;
-    int Nodos = 2;         // Establece Cuantos Nodos Conforman La Red a6
+    int Nodos = 2;         // Establece Cuantos Nodos Conforman La Red a6.
+    byte Nodo_info=0;
   //-3.3 RFM95 Variables.
     //********************************************************
     int16_t packetnum = 0;  // packet counter, we increment per xmission
@@ -262,7 +263,8 @@ void loop(){
       msg1_Write=0;
     }
     void b2_Preparo_informacion_propia (int a1, int a2){
-      int aa=a1;
+      // Byte 7
+      bitSet(Nodo_info,0);
       int aa2=a2;
     }
     void b3_info_recibida (){
@@ -330,7 +332,7 @@ void loop(){
     // Function Tipo B
       if (funtion_Mode=="B" && funtion_Number=="1"){
         Serial.println("funion B Nº1");
-        b1_estados();
+        // b1_estados();
       }
       if (funtion_Mode=="B" && funtion_Number=="2"){
         Serial.println("funion B Nº2");
