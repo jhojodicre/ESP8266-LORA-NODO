@@ -56,6 +56,9 @@
       String Nodo ="1";
       bool responder=false;
       int Nodos = 2;         // Establece Cuantos Nodos Conforman La Red a6.
+      
+      byte compañeros1;
+      byte compañeros2;
       byte Nodo_info=0;
   //-3.3 RFM95 Variables.
     //********************************************************
@@ -67,8 +70,8 @@
     // Variables para enviar.
       int packetSize = 0;
       String outgoing;              // outgoing message
-      byte msg1_Write = 0;            // count of outgoing messages
-      byte msg2_Write = 0;            // count of outgoing messages
+      byte msg1_Write = 0;            // Habilito bandera del Nodo que envia 
+      byte msg2_Write = 0;            // Habilito bandera del Nodo que envia
       byte localAddress = 0x01;     // address of this device           a3
       byte destination = 0xFF;      // destination to send to           a4
       long lastSendTime = 0;        // last send time
@@ -79,6 +82,7 @@
       byte sender;            // sender address
       byte incomingMsgId1;     // incoming msg ID
       byte incomingMsgId2;     // incoming msg ID
+      byte nodo_informa;       // informacion particular que envia el nodo
       byte incomingLength;    // incoming msg length
       String incoming = "";
 //4. Intancias.
@@ -175,10 +179,13 @@ void loop(){
 
     //-5.2 Responsde si el mensaje es para él.
       if(responder){
+        b1();
+        b2();
+        b3();
         destination=sender;                           // add destination address.
         localAddress=String(Nodo).toInt();            // add sender address.
         // msgCount=1;                                   // add message ID.
-        RFM95_enviar(Compañeros+char(Zonas));
+        RFM95_enviar();
       }
       
 }
@@ -263,10 +270,9 @@ void loop(){
       bitSet(msg1_Write, sender);
       msg2_Write=0;
     }
-    void b2 (int a1, int a2){
+    void b2 (){
       // Byte 7
       bitSet(Nodo_info,0);
-      int aa2=a2;
     }
     void b3 (){
       msg1_Write=incomingMsgId1;
@@ -297,7 +303,8 @@ void loop(){
       }
       if (funtion_Mode=="A" && funtion_Number=="2"){
         Serial.println("funion A Nº2");
-        Serial.println("Hola Funcion 2");
+        Compañeros=inputString.substring(2);
+        Serial.println(Compañeros);
       }
       if (funtion_Mode=="A" && funtion_Number=="3"){
         Serial.println("funion A Nº3");
@@ -310,7 +317,6 @@ void loop(){
       }
       if (funtion_Mode=="A" && funtion_Number=="5"){
         Serial.println("funion A Nº5");
-        RFM95_enviar("Maestro");
       }
       if (funtion_Mode=="A" && funtion_Number=="6"){
         Serial.println("funion A Nº6: Numero de Nodos");
@@ -329,15 +335,17 @@ void loop(){
       }
       if (funtion_Mode=="A" && funtion_Number=="0"){
         Serial.println("funion A Nº0");
+        RFM95_enviar("Maestro");
       }
     // Function Tipo B
+      //
       if (funtion_Mode=="B" && funtion_Number=="1"){
         Serial.println("funion B Nº1: Quien envia?");
         b1();
       }
       if (funtion_Mode=="B" && funtion_Number=="2"){
         Serial.println("funion B Nº2: Preparo informacion propia");
-        b2_Preparo_informacion_propia();
+        b2();
       }
       if (funtion_Mode=="B" && funtion_Number=="3"){
         Serial.println("funion B Nº3:  info recibida ");
@@ -392,6 +400,7 @@ void loop(){
       sender = LoRa.read();            // sender address
       incomingMsgId1 = LoRa.read();     // incoming msg ID
       incomingMsgId2 = LoRa.read();     // incoming msg ID
+      nodo_informa = LoRa.read();
       incomingLength = LoRa.read();    // incoming msg length
       incoming = "";
 
@@ -434,6 +443,7 @@ void loop(){
       LoRa.write(localAddress);             // add sender address
       LoRa.write(msg1_Write);                 // add message ID
       LoRa.write(msg2_Write);                 // add message ID
+      LoRa.write(Nodo_info); 
       LoRa.write(outgoing.length());        // add payload length
       LoRa.print(outgoing);                 // add payload
       LoRa.endPacket();                     // finish packet and send it
