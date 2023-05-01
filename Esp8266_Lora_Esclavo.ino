@@ -41,32 +41,43 @@
     String funtion_Parmeter1;     // Parametro 1 de la Funcion.
     String funtion_Parmeter2;     // Parametro 2 de la Funcion.
     String funtion_Parmeter3;     // Parametro 3 de la Funcion.
+    
+    volatile int x1=0;
+    volatile int x2=0;
+    volatile int x3=0;
+
     bool codified_funtion=false;  // Notifica que la funcion ha sido codificada.
-    // Variables Para la Placa.
-      int Zona_1 = 4;
-      int Zona_2 = 10;
-      int Zona_3 = 9;
-      int Aceptar= 0;
+    // Variables Para Hardware.
+      //Entradas
+        int Zona_1 = 4;         // Entrada de Zona 1
+        int Zona_2 = 10;        // Entrada de Zona 2
+        int Zona_3 = 9;         // Entrada de Zona 3
+        int Aceptar= 0;         // Entrada de Pulsador Aceptar
+
+
+
       int Zonas=0;
       String Compañeros="0";
-      volatile int x1=0;
-      volatile int x2=0;
-      volatile int x3=0;
+
 
       String Nodo ="1";
       bool responder=false;
       int Nodos = 2;         // Establece Cuantos Nodos Conforman La Red a6.
-      
       byte compañeros1;
       byte compañeros2;
-      byte Nodo_info=0;
+      String Nodo_info="";
+    // Alarmas
+      bool Alarma_Zona_1=0;
+      bool Alarma_Zona_2=0;
+      bool Alarma_Zona_3=0;
+    // Eventos
+      bool Nodo_Reconocido=0;
   //-3.3 RFM95 Variables.
     //********************************************************
     int16_t packetnum = 0;  // packet counter, we increment per xmission
     unsigned int placa; // placa en el perimetro.
     unsigned int zona;  // Zona del perimetro.
-    char radiopacket[32] = "012345 23456789 1   ";
-
+    byte master=0xFF;
     // Variables para enviar.
       int packetSize = 0;
       String outgoing;              // outgoing message
@@ -76,7 +87,6 @@
       byte destination = 0xFF;      // destination to send to           a4
       long lastSendTime = 0;        // last send time
       int interval = 2000;          // interval between sends.
-
     // Variables para recibir.
       int recipient;          // recipient address
       byte sender;            // sender address
@@ -117,7 +127,6 @@ void setup(){
       pinMode(Zona_2, INPUT_PULLUP);
       pinMode(Zona_3, INPUT_PULLUP);
       pinMode(Aceptar, INPUT_PULLUP);
-
   //2. Condiciones Iniciales.
     //-2.1 Estado de Salidas.
       digitalWrite(LED_azul,HIGH);
@@ -138,7 +147,6 @@ void setup(){
   //5. Configuracion de DEVICE externos.
     //-5.1 RFM95 Configuracion.
       LoRa.setPins(RFM95_CS, RFM95_RST, RFM95_INIT);
-
     //-5.2 RFM95 Iniciar.
       //****************************
       if (!LoRa.begin(RFM95_FREQ)) {
@@ -168,26 +176,20 @@ void loop(){
         codified_funtion=false;
       }
     //-3.2 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-      if(!digitalRead(Aceptar)){
-        inicio=true;
-      }
-    //-3.3 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+
       reviso();
   //5. RFM95 Funciones.
     //-5.1 RFM95 RUN.
       RFM95_recibir(LoRa.parsePacket());
-
     //-5.2 Responsde si el mensaje es para él.
       if(responder){
-        b1();
-        b2();
-        b3();
-        destination=sender;                           // add destination address.
-        localAddress=String(Nodo).toInt();            // add sender address.
-        // msgCount=1;                                   // add message ID.
-        RFM95_enviar();
+        if(sender==master){
+          b1();
+        }
+        if(sender==master){
+          b2();
+        }
+        RFM95_enviar(Nodo_info);
       }
-      
 }
 //1. Funciones de Logic interna del Micro.
   void welcome(){
@@ -263,24 +265,40 @@ void loop(){
       Nodos=parametro_1;
       
     }
-
   //-2.2 Funciones tipo B.
     // Identifico quien Envia el Mensaje Byte
-    void b1(){
-      bitSet(msg1_Write, sender);
-      msg2_Write=0;
+    void b1 (){
+      // 1. Destinatario.
+      destination=sender;                           // add destination address.
+      // 2. Remitente.
+      localAddress=String(Nodo).toInt();            // add sender address.
+      // 3. Nodos Leidos 1.
+      msg1_Write=incomingMsgId1;
+      // 4.
+      msg2_Write=incomingMsgId2;
+      // 5.
+      Nodo_info=
+      // 6.
+
+      // 7.
+
     }
     void b2 (){
-      // Byte 7
+      // Establesco la Informacion Del Nodo Byte 7
       bitSet(Nodo_info,0);
     }
     void b3 (){
-      msg1_Write=incomingMsgId1;
-      msg2_Write=incomingMsgId2;
+      // Informacion Acerca de los nodos que pude LEER.
+      // Si el mensaje viene del Maestro, preparar el mesaje para responder al Maestro
+      
+      
     }
     void b4 (int a1, int a2){
       int aa=a1;
       int aa2=a2;
+      bitSet(msg1_Write, sender);
+      msg2_Write=0;
+
     }
     void b5 (int a1, int a2){
       int aa=a1;
@@ -289,6 +307,21 @@ void loop(){
     void b6 (int a1, int a2){
       int aa=a1;
       int aa2=a2;
+    }
+    void b7 (int a1, int a2){
+      int aa=a1;
+      int aa2=a2;
+    }
+    void b8 (int a1, int a2){
+      int aa=a1;
+      int aa2=a2;
+    }
+    void b9 (int a1, int a2){
+      int aa=a1;
+      int aa2=a2;
+    }
+    void b0 (){
+      int aa=1;
     }
 //3. Gestiona las funciones a Ejecutar.
   void ejecutar_solicitud(){
@@ -377,7 +410,7 @@ void loop(){
       }     
       if (funtion_Mode=="B" && funtion_Number=="0"){
         Serial.println("funion B Nº0");
-        b0(1,1);
+        b0();
       }                            
     else{
       Serial.println("Ninguna Funcion");
@@ -387,10 +420,21 @@ void loop(){
 //4. Funcion que Revisa estados a ser enviados.
   //-4.1 Estados de Zonas.
     void reviso(){
-      Zonas  = (char)digitalRead(Zona_1);
-      Zonas += (char)digitalRead(Zona_2);
+      if(!digitalRead(Zona_1)){
+        Alarma_Zona_1=1;
+      }
+      if(!digitalRead(Zona_1));{
+        Alarma_Zona_2=1;
+      }
+      if(!digitalRead(Zona_1));{
+        Alarma_Zona_3=1;
+      }
+      if(!digitalRead(Aceptar)){
+        Alarma_Zona_1=0;
+        Alarma_Zona_2=0;
+        Alarma_Zona_3=0;
+      }
     }
-
 //5. Funciones de Dispositivos Externos.
   //-5.1 RFM95 RECIBIR.
     void RFM95_recibir(int packetSize){
@@ -400,7 +444,6 @@ void loop(){
       sender = LoRa.read();            // sender address
       incomingMsgId1 = LoRa.read();     // incoming msg ID
       incomingMsgId2 = LoRa.read();     // incoming msg ID
-      nodo_informa = LoRa.read();
       incomingLength = LoRa.read();    // incoming msg length
       incoming = "";
 
@@ -441,9 +484,8 @@ void loop(){
       LoRa.beginPacket();                   // start packet
       LoRa.write(destination);              // add destination address
       LoRa.write(localAddress);             // add sender address
-      LoRa.write(msg1_Write);                 // add message ID
-      LoRa.write(msg2_Write);                 // add message ID
-      LoRa.write(Nodo_info); 
+      LoRa.write(msg1_Write);               // add message ID
+      LoRa.write(msg2_Write);               // add message ID
       LoRa.write(outgoing.length());        // add payload length
       LoRa.print(outgoing);                 // add payload
       LoRa.endPacket();                     // finish packet and send it
