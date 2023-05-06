@@ -63,13 +63,16 @@
       String Nodo ="1";
       bool responder=false;
       int Nodos = 2;         // Establece Cuantos Nodos Conforman La Red a6.
+      // Variables para Logica interna
       byte compañeros1;
       byte compañeros2;
       String Nodo_info="";
+      String letras="";
+      String Nodo_cercano=""; // Guardo la direccion del Nodo que escribe
     // Alarmas
-      bool Alarma_Zona_1=0;
-      bool Alarma_Zona_2=0;
-      bool Alarma_Zona_3=0;
+      int Alarma_Zona_1=0;
+      int Alarma_Zona_2=0;
+      int Alarma_Zona_3=0;
     // Eventos
       bool Nodo_Reconocido=0;
   //-3.3 RFM95 Variables.
@@ -161,7 +164,7 @@ void loop(){
     //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     while (inicio){
       welcome();        // Comprobamos el Sistema minimo de Funcionamiento.
-      led_Monitor(5);
+      led_Monitor(3);
     }
   //2. Decodificar funcion serial
     //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -174,6 +177,7 @@ void loop(){
         ejecutar_solicitud();
         // 3.1 Desactivar Banderas.
         codified_funtion=false;
+        inputString="";
       }
     //-3.2 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+
       reviso();
@@ -218,7 +222,7 @@ void loop(){
     funtion_Number=inputString.substring(1,2);
     funtion_Parmeter1=inputString.substring(2,3);
     funtion_Parmeter2=inputString.substring(3,4);
-    inputString="";
+    
     Serial.println("funcion: " + funtion_Mode);
     Serial.println("Numero: " + funtion_Number);
     Serial.println("Parametro1: " + funtion_Parmeter1);
@@ -228,6 +232,7 @@ void loop(){
 //2. Funciones Seleccionadas para Ejecutar.
   //-2.1 Funciones Tipo A.
     void a1_Nodo_Destellos (int repeticiones, int tiempo){
+      // FUNCION PROBADA CORRECTAMENTE
       int veces=repeticiones;
       int retardo=tiempo*100;
       Serial.println("Ejecutando F1.. \n");
@@ -238,9 +243,10 @@ void loop(){
         digitalWrite(LED_azul, HIGH);    // Led OFF.
       }
     }
-    void a2_Serial_Enviar(int direccion, int buffer){
-      // Deshabilitamos Banderas
-      Serial.println("hola");         // Pureba de Comunicacion Serial.
+    void a2(){
+      // FUNCION PROBADA CORRECTAMENTE
+      letras=inputString.substring(2);
+      Serial.println("letras:" + letras);         // Pureba de Comunicacion Serial.
     }
     void a3_Nodo_Direccion(){
       // Deshabilitamos Banderas
@@ -253,6 +259,7 @@ void loop(){
     }
     void a3_Nodo_Direccion_Local(int paramatro_1){
       localAddress = paramatro_1;
+      Serial.println(localAddress);
 
     }
     void a4_Nodo_Direccion_Destino(int direccion_aux){
@@ -269,23 +276,25 @@ void loop(){
     // Identifico quien Envia el Mensaje Byte
     void b1 (){
       // 1. Destinatario.
-      destination=sender;                           // add destination address.
+      destination=sender;                           // Respondo a quien me escribe.
       // 2. Remitente.
-      localAddress=String(Nodo).toInt();            // add sender address.
+      localAddress=String(Nodo).toInt();            // Establecer direccion Local.
       // 3. Nodos Leidos 1.
       msg1_Write=incomingMsgId1;
-      // 4.
+      // 4. Nodos Leidos 2.
       msg2_Write=incomingMsgId2;
       // 5.
-      Nodo_info=
+      Nodo_info=String(Alarma_Zona_1+Alarma_Zona_2, HEX);
       // 6.
-
+      
       // 7.
 
     }
     void b2 (){
-      // Establesco la Informacion Del Nodo Byte 7
-      bitSet(Nodo_info,0);
+      // Decodifico quien envia el mensaje.
+      // Establecer la proxima direccion del Nodo
+      // Si es el Ultimo Nodo Enviar al Maestro.
+     // Nodo_cercano=
     }
     void b3 (){
       // Informacion Acerca de los nodos que pude LEER.
@@ -336,8 +345,7 @@ void loop(){
       }
       if (funtion_Mode=="A" && funtion_Number=="2"){
         Serial.println("funion A Nº2");
-        Compañeros=inputString.substring(2);
-        Serial.println(Compañeros);
+        a2();
       }
       if (funtion_Mode=="A" && funtion_Number=="3"){
         Serial.println("funion A Nº3");
