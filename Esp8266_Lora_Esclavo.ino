@@ -86,8 +86,8 @@
       String outgoing;              // outgoing message
       byte msg1_Write = 0;            // Habilito bandera del Nodo que envia 
       byte msg2_Write = 0;            // Habilito bandera del Nodo que envia
-      byte localAddress = 0x01;     // address of this device           a3
-      byte destination = 0xFF;      // destination to send to           a4
+      byte localAddress = 0xFF;     // address of this device           a3
+      byte destination = 0x01;      // destination to send to           a4
       long lastSendTime = 0;        // last send time
       int interval = 2000;          // interval between sends.
     // Variables para recibir.
@@ -192,7 +192,7 @@ void loop(){
         if(sender==master){
           b2();
         }
-        RFM95_enviar(Nodo_info);
+        RFM95_enviar(Nodo_info+letras);
       }
 }
 //1. Funciones de Logic interna del Micro.
@@ -217,12 +217,13 @@ void loop(){
     //Deshabilitamos Banderas
     stringComplete=false;
     codified_funtion=true;
-    Serial.println(inputString);         // Pureba de Comunicacion Serial.
     funtion_Mode=inputString.substring(0,1);
     funtion_Number=inputString.substring(1,2);
     funtion_Parmeter1=inputString.substring(2,3);
     funtion_Parmeter2=inputString.substring(3,4);
-    
+
+
+    Serial.println(inputString);         // Pureba de Comunicacion Serial.
     Serial.println("funcion: " + funtion_Mode);
     Serial.println("Numero: " + funtion_Number);
     Serial.println("Parametro1: " + funtion_Parmeter1);
@@ -269,8 +270,10 @@ void loop(){
       msg1_Write++;                           // increment message ID.
     }
     void a6_Nodo_Numeros(int parametro_1){
-      Nodos=parametro_1;
-      
+      Nodos=parametro_1;  
+    }
+    void a7(){
+      int a;
     }
   //-2.2 Funciones tipo B.
     // Identifico quien Envia el Mensaje Byte
@@ -367,12 +370,15 @@ void loop(){
       }
       if (funtion_Mode=="A" && funtion_Number=="7"){
         Serial.println("funion A Nº7");
+        a7();
       }
       if (funtion_Mode=="A" && funtion_Number=="8"){
         Serial.println("funion A Nº8");
       }
       if (funtion_Mode=="A" && funtion_Number=="9"){
         Serial.println("funion A Nº9");
+        responder=true;
+        letras=inputString.substring(2);
       }
       if (funtion_Mode=="A" && funtion_Number=="0"){
         Serial.println("funion A Nº0");
