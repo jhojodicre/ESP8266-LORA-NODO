@@ -296,9 +296,11 @@ void loop(){
       int a=tipo_Modo;
       if(a==1){
         modo_Continuo=true;
+        responder=true;
       }
       if(a==0){
         modo_Continuo=false;
+        responder=false;
       }
     }
   //-2.2 Funciones tipo B.
