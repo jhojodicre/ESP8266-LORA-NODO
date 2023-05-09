@@ -283,6 +283,7 @@ void loop(){
 
     }
     void a4_Nodo_Direccion_Destino(int direccion_aux){
+      Serial.println(destination);
       destination = direccion_aux;
     }
     void a5_Nodo_Mensaje_ID(){      
@@ -396,6 +397,9 @@ void loop(){
       }
       if (funtion_Mode=="A" && funtion_Number=="4"){
         Serial.println("funion A Nº4");
+        String Nodo_direccion_aux = funtion_Parmeter1+funtion_Parmeter2+funtion_Parmeter3;
+        int Nodo_direccion = Nodo_direccion_aux.toInt();
+        a4_Nodo_Direccion_Destino(Nodo_direccion);
       }
       if (funtion_Mode=="A" && funtion_Number=="5"){
         Serial.println("funion A Nº5");
