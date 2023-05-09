@@ -206,6 +206,7 @@ void loop(){
           b2();
         }
         if(modo_Continuo && flag_Un_segundo){
+          flag_Un_segundo=false;
           a5_Nodo_Mensaje_ID();
           b3();
         }
