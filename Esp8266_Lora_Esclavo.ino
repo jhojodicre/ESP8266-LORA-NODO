@@ -66,7 +66,7 @@
       String Nodo ="1";
       bool responder=false;
       int Nodos = 2;         // Establece Cuantos Nodos Conforman La Red a6.
-      int modo_Continuo;
+      bool modo_Continuo;
       // Variables para Logica interna
       byte compañeros1;
       byte compañeros2;
@@ -291,7 +291,13 @@ void loop(){
       Nodos=parametro_1;  
     }
     void a7(int tipo_Modo){
-      modo_Continuo=tipo_Modo;
+      int a=tipo_Modo;
+      if(a){
+        modo_Continuo=true;
+      }
+      else{
+        modo_Continuo=false;
+      }
     }
   //-2.2 Funciones tipo B.
     // Identifico quien Envia el Mensaje Byte
