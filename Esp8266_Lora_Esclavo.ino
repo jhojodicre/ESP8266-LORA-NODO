@@ -47,6 +47,8 @@
     volatile int x3=0;
 
     bool codified_funtion=false;  // Notifica que la funcion ha sido codificada.
+    
+    bool flag_Un_segundo=false;
     // Variables Para Hardware.
       //Entradas
         int Zona_1 = 4;         // Entrada de Zona 1
@@ -55,7 +57,8 @@
         int Aceptar= 0;         // Entrada de Pulsador Aceptar
 
 
-
+      unsigned long tiempo1;
+      unsigned long tiempo2;
       int Zonas=0;
       String Compañeros="0";
 
@@ -63,6 +66,7 @@
       String Nodo ="1";
       bool responder=false;
       int Nodos = 2;         // Establece Cuantos Nodos Conforman La Red a6.
+      int modo_Continuo;
       // Variables para Logica interna
       byte compañeros1;
       byte compañeros2;
@@ -81,15 +85,17 @@
     unsigned int placa; // placa en el perimetro.
     unsigned int zona;  // Zona del perimetro.
     byte master=0xFF;
+    byte siguiente=2; // Direccion del Nodo que sigue para enviar mensaje
     // Variables para enviar.
       int packetSize = 0;
       String outgoing;              // outgoing message
       byte msg1_Write = 0;            // Habilito bandera del Nodo que envia 
       byte msg2_Write = 0;            // Habilito bandera del Nodo que envia
-      byte localAddress = 0xFF;     // address of this device           a3
-      byte destination = 0x01;      // destination to send to           a4
+      byte localAddress = 0x01;     // address of this device           a3
+      byte destination = 0xFF;      // destination to send to           a4
       long lastSendTime = 0;        // last send time
-      int interval = 2000;          // interval between sends.
+      int interval = 2000;
+      byte msg_ID;    // en modo continuo este numero incrementa automaticamente.          // interval between sends.
     // Variables para recibir.
       int recipient;          // recipient address
       byte sender;            // sender address
@@ -140,6 +146,8 @@ void setup(){
     //-3.1 Initialize serial communication at 9600 bits per second:
       Serial.begin(9600);
       delay(10);
+    //-3.2 Temporizador.
+      tiempo1=millis();
     //-3.2 Interrupciones Habilitadas.
       //****************************
       //attachInterrupt (digitalPinToInterrupt (Aceptar), pinChange, CHANGE);  // attach interrupt handler for D2
@@ -162,6 +170,11 @@ void setup(){
 void loop(){
   //1. Bienvenida Funcion 
     //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    tiempo2 = millis();
+    
+  if(tiempo2 > (tiempo1+1000)){
+    flag_Un_segundo=true;  
+  }
     while (inicio){
       welcome();        // Comprobamos el Sistema minimo de Funcionamiento.
       led_Monitor(3);
@@ -189,8 +202,12 @@ void loop(){
         if(sender==master){
           b1();
         }
-        if(sender==master){
+        if(sender==siguiente){
           b2();
+        }
+        if(modo_Continuo && flag_Un_segundo){
+          a5_Nodo_Mensaje_ID();
+          b3();
         }
         RFM95_enviar(Nodo_info+letras);
       }
@@ -200,8 +217,8 @@ void loop(){
     // Deshabilitamos Banderas
       inicio=false;
       Serial.println("Sistema Iniciado");
-      Serial.println("Nodo: "+Nodo+" Ready");
-      
+      Serial.println("Direccion: ");
+      Serial.println(localAddress);
   }
   void led_Monitor(int repeticiones){
     // Deshabilitamos Banderas
@@ -267,13 +284,13 @@ void loop(){
       destination = direccion_aux;
     }
     void a5_Nodo_Mensaje_ID(){      
-      msg1_Write++;                           // increment message ID.
+      msg_ID++;                           // increment message ID.
     }
     void a6_Nodo_Numeros(int parametro_1){
       Nodos=parametro_1;  
     }
-    void a7(){
-      int a;
+    void a7(int tipo_Modo){
+      modo_Continuo=tipo_Modo;
     }
   //-2.2 Funciones tipo B.
     // Identifico quien Envia el Mensaje Byte
@@ -286,11 +303,12 @@ void loop(){
       msg1_Write=incomingMsgId1;
       // 4. Nodos Leidos 2.
       msg2_Write=incomingMsgId2;
-      // 5.
+      // 5. Longitud de Bytes de la Cadena incoming
+        // Este byte lo escribe antes de Enviar el mensaje
+      // 6. Este byte contiene Informacion del Nodo
       Nodo_info=String(Alarma_Zona_1+Alarma_Zona_2, HEX);
-      // 6.
-      
-      // 7.
+      // 7. Byte Escrito desde recepcion Serial o Predefinido.
+      // 7. Byte Escrito desde recepcion Serial o Predefinido.
 
     }
     void b2 (){
@@ -302,7 +320,19 @@ void loop(){
     void b3 (){
       // Informacion Acerca de los nodos que pude LEER.
       // Si el mensaje viene del Maestro, preparar el mesaje para responder al Maestro
-      
+      destination=sender;                           // Respondo a quien me escribe.
+      // 2. Remitente.
+      localAddress=String(Nodo).toInt();            // Establecer direccion Local.
+      // 3. Nodos Leidos 1.
+      msg1_Write=incomingMsgId1;
+      // 4. Nodos Leidos 2.
+      msg2_Write=incomingMsgId2;
+      // 5. Longitud de Bytes de la Cadena incoming
+        // Este byte lo escribe antes de Enviar el mensaje
+      // 6. Este byte contiene Informacion del Nodo
+      Nodo_info=String(msg_ID, HEX);
+      // 7. Byte Escrito desde recepcion Serial o Predefinido.
+      // 7. Byte Escrito desde recepcion Serial o Predefinido.
       
     }
     void b4 (int a1, int a2){
@@ -352,7 +382,7 @@ void loop(){
       }
       if (funtion_Mode=="A" && funtion_Number=="3"){
         Serial.println("funion A Nº3");
-        String Nodo_direccion_aux = funtion_Parmeter1+funtion_Parmeter2;
+        String Nodo_direccion_aux = funtion_Parmeter1+funtion_Parmeter2+funtion_Parmeter3;
         int Nodo_direccion = Nodo_direccion_aux.toInt();
         a3_Nodo_Direccion_Local(Nodo_direccion);
       }
@@ -370,7 +400,7 @@ void loop(){
       }
       if (funtion_Mode=="A" && funtion_Number=="7"){
         Serial.println("funion A Nº7");
-        a7();
+        a7(x1);
       }
       if (funtion_Mode=="A" && funtion_Number=="8"){
         Serial.println("funion A Nº8");
