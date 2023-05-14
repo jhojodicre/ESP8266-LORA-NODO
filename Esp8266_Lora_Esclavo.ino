@@ -24,7 +24,7 @@
 
   //-2.4. Constantes
     //********************************************************
-    #define RFM95_FREQ 915E6
+    #define RFM95_FREQ 915E6  
   //-2.5 timer
 
 
@@ -205,13 +205,8 @@ void loop(){
       flag_ISR_prueba=false;
       a1_Nodo_Destellos(1,3);
     }
-    if(flag_temporizador_1){
-      // flag_temporizador_1=false;
-      // a1_Nodo_Destellos(3, 1);
-    }
+
   //5. RFM95 Funciones.
-    //-5.1 RFM95 RUN.
-      RFM95_recibir(LoRa.parsePacket());
     //-5.2 Responsde si el mensaje es para él.
       if(responder){
         if(sender==master){
@@ -227,6 +222,8 @@ void loop(){
         }
         RFM95_enviar(Nodo_info+letras);
       }
+    //-5.2 RFM95 RECIBIR.
+      RFM95_recibir(LoRa.parsePacket());
 }
 //1. Funciones de Logic interna del Micro.
   void welcome(){
@@ -254,6 +251,7 @@ void loop(){
     funtion_Number=inputString.substring(1,2);
     funtion_Parmeter1=inputString.substring(2,3);
     funtion_Parmeter2=inputString.substring(3,4);
+    funtion_Parmeter3=inputString.substring(4,5);
 
 
     Serial.println(inputString);         // Pureba de Comunicacion Serial.
@@ -282,23 +280,18 @@ void loop(){
       letras=inputString.substring(2);
       Serial.println("letras:" + letras);         // Pureba de Comunicacion Serial.
     }
-    void a3_Nodo_Direccion(){
-      // Deshabilitamos Banderas
-      Nodo=funtion_Parmeter1+funtion_Parmeter2;
-      Serial.println("Nodo:"+ Nodo + "Configurado Exitosamente");         // Pureba de Comunicacion Serial.
-    }
-    void a2_Nodo_Serial_Enviar(int direccion, int buffer){
-      // Deshabilitamos Banderas
-      Serial.println("hola");         // Pureba de Comunicacion Serial.
-    }
     void a3_Nodo_Direccion_Local(int paramatro_1){
+      Serial.println("Ejecutando F3.. \n");
       localAddress = paramatro_1;
+      Serial.print("Drireccion Local: ");
       Serial.println(localAddress);
-
     }
     void a4_Nodo_Direccion_Destino(int direccion_aux){
-      Serial.println(destination);
+      Serial.println("Ejecutando F4.. \n");
       destination = direccion_aux;
+      Serial.print("Drireccion Destino: ");
+      Serial.println(destination);
+      
     }
     void a5_Nodo_Mensaje_ID(){      
       msg_ID++;                           // increment message ID.
@@ -325,14 +318,14 @@ void loop(){
       // 1. Destinatario.
       destination=sender;                           // Respondo a quien me escribe.
       // 2. Remitente.
-      localAddress=String(Nodo).toInt();            // Establecer direccion Local.
+      //localAddress=String(Nodo).toInt();            // Establecer direccion Local.
       // 3. Nodos Leidos 1.
       msg1_Write=incomingMsgId1;
       // 4. Nodos Leidos 2.
       msg2_Write=incomingMsgId2;
-      // 5. Longitud de Bytes de la Cadena incoming
-        // Este byte lo escribe antes de Enviar el mensaje
-      // 6. Este byte contiene Informacion del Nodo
+      // 5. Longitud de Bytes de la Cadena incoming.
+      // Este byte lo escribe antes de Enviar el mensaje.
+      // 6. Este byte contiene Informacion del Nodo.
       Nodo_info=String(Alarma_Zona_1+Alarma_Zona_2, HEX);
       // 7. Byte Escrito desde recepcion Serial o Predefinido.
       // 7. Byte Escrito desde recepcion Serial o Predefinido.
@@ -349,7 +342,7 @@ void loop(){
       // Si el mensaje viene del Maestro, preparar el mesaje para responder al Maestro
       destination=sender;                           // Respondo a quien me escribe.
       // 2. Remitente.
-      localAddress=String(Nodo).toInt();            // Establecer direccion Local.
+      //localAddress=String(Nodo).toInt();            // Establecer direccion Local.
       // 3. Nodos Leidos 1.
       msg1_Write=incomingMsgId1;
       // 4. Nodos Leidos 2.
@@ -403,92 +396,115 @@ void loop(){
         Serial.println("funion A Nº001");
         a1_Nodo_Destellos(x1,x2);
       }
-      if (funtion_Mode=="A" && funtion_Number=="2"){
+      else if (funtion_Mode=="A" && funtion_Number=="2"){
         Serial.println("funion A Nº2");
         a2();
       }
-      if (funtion_Mode=="A" && funtion_Number=="3"){
+      else if (funtion_Mode=="A" && funtion_Number=="3"){
+        // FUNCIONO A MEDIAS SOLO DIRECIONES BAJAS Y 255 falta acomodar un poco mas
         Serial.println("funion A Nº3");
-        String Nodo_direccion_aux = funtion_Parmeter1+funtion_Parmeter2+funtion_Parmeter3;
+        String Nodo_direccion_aux = "";
+        Nodo_direccion_aux = funtion_Parmeter1 + funtion_Parmeter2 + funtion_Parmeter3;
+        //Serial.println(Nodo_direccion_aux);
         int Nodo_direccion = Nodo_direccion_aux.toInt();
+        //Serial.println(Nodo_direccion);
         a3_Nodo_Direccion_Local(Nodo_direccion);
       }
-      if (funtion_Mode=="A" && funtion_Number=="4"){
+      else if (funtion_Mode=="A" && funtion_Number=="4"){
         Serial.println("funion A Nº4");
-        String Nodo_direccion_aux = funtion_Parmeter1+funtion_Parmeter2+funtion_Parmeter3;
-        int Nodo_direccion = Nodo_direccion_aux.toInt();
-        a4_Nodo_Direccion_Destino(Nodo_direccion);
+        String Nodo_destino_aux = "";
+        Nodo_destino_aux = funtion_Parmeter1+funtion_Parmeter2+funtion_Parmeter3;
+        int Nodo_destino = Nodo_destino_aux.toInt();
+        a4_Nodo_Direccion_Destino(Nodo_destino);
       }
-      if (funtion_Mode=="A" && funtion_Number=="5"){
+      else if (funtion_Mode=="A" && funtion_Number=="5"){
         Serial.println("funion A Nº5");
       }
-      if (funtion_Mode=="A" && funtion_Number=="6"){
+      else if (funtion_Mode=="A" && funtion_Number=="6"){
         Serial.println("funion A Nº6: Numero de Nodos");
         String Nodos_numeros_aux = funtion_Parmeter1+funtion_Parmeter2;
         int Nodos_numeros = Nodos_numeros_aux.toInt();
         a6_Nodo_Numeros(Nodos_numeros);
       }
-      if (funtion_Mode=="A" && funtion_Number=="7"){
+      else if (funtion_Mode=="A" && funtion_Number=="7"){
         Serial.println("funion A Nº7");
         a7(x1);
       }
-      if (funtion_Mode=="A" && funtion_Number=="8"){
-        Serial.println("funion A Nº8");
+      else if (funtion_Mode=="A" && funtion_Number=="8"){
+        Serial.println("funion A Nº8 Status");
+        //1.
+        Serial.print("Direccion Local: ");
+        Serial.println(localAddress);
+        //2.
+        Serial.print("Direccion Destino: ");
+        Serial.println(destination);
+        //3.
+        Serial.print("Modo Continuo: ");
+        Serial.println(modo_Continuo);
+        //4.
+        // Serial.print(": ");
+        // Serial.println();
+        // //5.
+        // Serial.print(": ");
+        // Serial.println();
+        // //6.
+        // Serial.print(": ");
+        // Serial.println();
       }
-      if (funtion_Mode=="A" && funtion_Number=="9"){
+      else if (funtion_Mode=="A" && funtion_Number=="9"){
         Serial.println("funion A Nº9");
         responder=true;
         letras=inputString.substring(2);
       }
-      if (funtion_Mode=="A" && funtion_Number=="0"){
+      else if (funtion_Mode=="A" && funtion_Number=="0"){
         Serial.println("funion A Nº0");
         RFM95_enviar("Maestro");
       }
     // Function Tipo B
       //
-      if (funtion_Mode=="B" && funtion_Number=="1"){
+      else if (funtion_Mode=="B" && funtion_Number=="1"){
         Serial.println("funion B Nº1: Quien envia?");
         b1();
       }
-      if (funtion_Mode=="B" && funtion_Number=="2"){
+      else if (funtion_Mode=="B" && funtion_Number=="2"){
         Serial.println("funion B Nº2: Preparo informacion propia");
         b2();
       }
-      if (funtion_Mode=="B" && funtion_Number=="3"){
+      else if (funtion_Mode=="B" && funtion_Number=="3"){
         Serial.println("funion B Nº3:  info recibida ");
         b3();
       }
-      if (funtion_Mode=="B" && funtion_Number=="4"){
+      else if (funtion_Mode=="B" && funtion_Number=="4"){
         Serial.println("funion B Nº4");
         b4(1,1);
       }
-      if (funtion_Mode=="B" && funtion_Number=="5"){
+      else if (funtion_Mode=="B" && funtion_Number=="5"){
         Serial.println("funion B Nº5");
         b5(1,1);
       }
-      if (funtion_Mode=="B" && funtion_Number=="6"){
+      else if (funtion_Mode=="B" && funtion_Number=="6"){
         Serial.println("funion B Nº6");
         b6(1,1);
       }        
-      if (funtion_Mode=="B" && funtion_Number=="7"){
+      else if (funtion_Mode=="B" && funtion_Number=="7"){
         Serial.println("funion B Nº7");
         b7(1,1);
       }
-      if (funtion_Mode=="B" && funtion_Number=="8"){
+      else if (funtion_Mode=="B" && funtion_Number=="8"){
         Serial.println("funion B Nº8");
         b8(1,1);
       }     
-      if (funtion_Mode=="B" && funtion_Number=="9"){
+      else if (funtion_Mode=="B" && funtion_Number=="9"){
         Serial.println("funion B Nº9");
         b9(1,1);
       }     
-      if (funtion_Mode=="B" && funtion_Number=="0"){
+      else if (funtion_Mode=="B" && funtion_Number=="0"){
         Serial.println("funion B Nº0");
         b0();
       }                            
-    else{
+      else{
       Serial.println("Ninguna Funcion");
-    }
+      }
       
   }
 //4. Funcion que Revisa estados a ser enviados.
