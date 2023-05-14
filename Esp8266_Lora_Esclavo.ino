@@ -211,16 +211,19 @@ void loop(){
       if(responder){
         if(sender==master){
           b1();
+          RFM95_enviar(Nodo_info+letras);
         }
         if(sender==siguiente){
           b2();
+          RFM95_enviar(Nodo_info+letras);
         }
         if(modo_Continuo && flag_temporizador_1){
           flag_temporizador_1=false;
           a5_Nodo_Mensaje_ID();
           b3();
+          RFM95_enviar(Nodo_info+letras);
         }
-        RFM95_enviar(Nodo_info+letras);
+        
       }
     //-5.2 RFM95 RECIBIR.
       RFM95_recibir(LoRa.parsePacket());
