@@ -576,7 +576,6 @@ void loop(){
         stringComplete=true;
         responder=true;
       }
-
     }
   //-5.2 RFM95 ENVIAR.
     void RFM95_enviar(String outgoing){
