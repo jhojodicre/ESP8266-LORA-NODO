@@ -343,7 +343,7 @@ void loop(){
     void b3 (){
       // Informacion Acerca de los nodos que pude LEER.
       // Si el mensaje viene del Maestro, preparar el mesaje para responder al Maestro
-      destination=sender;                           // Respondo a quien me escribe.
+      destination=master;                           // Respondo a quien me escribe.
       // 2. Remitente.
       //localAddress=String(Nodo).toInt();            // Establecer direccion Local.
       // 3. Nodos Leidos 1.
