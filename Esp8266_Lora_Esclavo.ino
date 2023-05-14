@@ -213,11 +213,11 @@ void loop(){
           b1();
           RFM95_enviar(Nodo_info+letras);
         }
-        if(sender==siguiente){
+        else if(sender==siguiente){
           b2();
           RFM95_enviar(Nodo_info+letras);
         }
-        if(modo_Continuo && flag_temporizador_1){
+        else if(modo_Continuo && flag_temporizador_1){
           flag_temporizador_1=false;
           a5_Nodo_Mensaje_ID();
           b3();
