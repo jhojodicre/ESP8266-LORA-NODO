@@ -95,8 +95,8 @@
       String outgoing;              // outgoing message
       byte msg1_Write = 0;            // Habilito bandera del Nodo que envia 
       byte msg2_Write = 0;            // Habilito bandera del Nodo que envia
-      byte localAddress = 0xFF;     // address of this device           a3
-      byte destination = 0x01;      // destination to send to           a4
+      byte localAddress = 0x01;     // address of this device           a3
+      byte destination = 0xFF;      // destination to send to           a4
       long lastSendTime = 0;        // last send time
       int interval = 2000;
       byte msg_ID;    // en modo continuo este numero incrementa automaticamente.          // interval between sends.
@@ -223,7 +223,6 @@ void loop(){
           b3();
           RFM95_enviar(Nodo_info+letras);
         }
-        
       }
     //-5.2 RFM95 RECIBIR.
       RFM95_recibir(LoRa.parsePacket());
@@ -458,6 +457,7 @@ void loop(){
         Serial.println("funion A Nº9");
         responder=true;
         letras=inputString.substring(2);
+        // Serial.println(letras);
       }
       else if (funtion_Mode=="A" && funtion_Number=="0"){
         Serial.println("funion A Nº0");
@@ -565,7 +565,7 @@ void loop(){
       Serial.println();
 
       //Verificamos que el mensaje que nos llega sea para nosotros
-      if(String(recipient)==Nodo){
+      if(recipient==localAddress){
         inputString=incoming;
         stringComplete=true;
         responder=true;
