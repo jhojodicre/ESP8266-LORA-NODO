@@ -311,10 +311,12 @@ void loop(){
       if(a==1){
         modo_Continuo=true;
         responder=true;
+        temporizador_1.attach(1, ISR_temporizador_1);
       }
       if(a==0){
         modo_Continuo=false;
         responder=false;
+        temporizador_1.detach();
       }
     }
   //-2.2 Funciones tipo B.
