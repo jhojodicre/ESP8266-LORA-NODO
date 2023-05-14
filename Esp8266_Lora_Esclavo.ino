@@ -4,7 +4,7 @@
     //****************************
     #include <SPI.h>
     #include <LoRa.h>
-  
+    #include <Ticker.h>
 //2. Definicion de Pinout.
   //  Las Etiquetas para los pinout son los que comienzan con GPIO
   //  Es decir, si queremos activar la salida 1, tenemos que buscar la referencia GPIO 1, Pero solomante Escribir 1 sin "GPIO"
@@ -25,14 +25,18 @@
   //-2.4. Constantes
     //********************************************************
     #define RFM95_FREQ 915E6
-  
+  //-2.5 timer
+
+
 //3. Variables Globales.
   //********************************************************
 
   //-3.1 Variables para las Interrupciones
     String inputString;                     // Buffer recepcion Serial.
     volatile  bool stringComplete= false;   // Flag: mensaje Serial Recibido completo.
-  
+    volatile  bool flag_ISR_prueba=false;   // Flag: prueba para interrupcion serial.
+    volatile  int contador=0;
+    volatile  bool flag_temporizador_1=false;
   //-3.2 Variables Globales para Las Funciones.
     //********************************************************
     bool inicio=true;             // Habilitar mensaje de inicio por unica vez
@@ -91,8 +95,8 @@
       String outgoing;              // outgoing message
       byte msg1_Write = 0;            // Habilito bandera del Nodo que envia 
       byte msg2_Write = 0;            // Habilito bandera del Nodo que envia
-      byte localAddress = 0xFF;     // address of this device           a3
-      byte destination = 0x01;      // destination to send to           a4
+      byte localAddress = 0x01;     // address of this device           a3
+      byte destination = 0xFF;      // destination to send to           a4
       long lastSendTime = 0;        // last send time
       int interval = 2000;
       byte msg_ID;    // en modo continuo este numero incrementa automaticamente.          // interval between sends.
@@ -106,7 +110,7 @@
       String incoming = "";
 //4. Intancias.
   //********************************************************
-
+  Ticker temporizador_1;
 //5. Funciones ISR.
   //-5.1 Serial Function.
     void serialEvent (){
@@ -124,6 +128,14 @@
       }
     }
   //-5.2 Extern Function
+    ICACHE_RAM_ATTR void ISR_1(){
+      flag_ISR_prueba=true;
+    }
+    //-5.3 Interrupciones por Timer 1.
+    void ISR_temporizador_1(){
+      flag_temporizador_1=true;
+      responder=true;
+    }
 void setup(){
   //1. Configuracion de Puertos.
     //****************************
@@ -141,16 +153,15 @@ void setup(){
       digitalWrite(LED_azul,HIGH);
       digitalWrite(RFM95_RST, HIGH);
     //-2.2 Valores y Espacios de Variables
-      //sender=String(Nodo).toInt();
   //3. Configuracion de Perifericos:
     //-3.1 Initialize serial communication at 9600 bits per second:
       Serial.begin(9600);
       delay(10);
     //-3.2 Temporizador.
-      tiempo1=millis();
     //-3.2 Interrupciones Habilitadas.
       //****************************
-      //attachInterrupt (digitalPinToInterrupt (Aceptar), pinChange, CHANGE);  // attach interrupt handler for D2
+      attachInterrupt (digitalPinToInterrupt (PB_ENTER), ISR_1, FALLING);  // attach interrupt handler for D2
+      temporizador_1.attach(3, ISR_temporizador_1);
       //interrupts ();
   //4. Prueba de Sitema Minimo Configurado.
     //****************************
@@ -170,12 +181,6 @@ void setup(){
 void loop(){
   //1. Bienvenida Funcion 
     //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    tiempo2 = millis();
-    
-  if(tiempo2 > (tiempo1+1000)){
-    tiempo1=millis();
-    flag_Un_segundo=true;  
-  }
     while (inicio){
       welcome();        // Comprobamos el Sistema minimo de Funcionamiento.
       led_Monitor(3);
@@ -195,6 +200,15 @@ void loop(){
       }
     //-3.2 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+
       reviso();
+  //4. Atender Las fucniones desde activas desde ISR.
+    if(flag_ISR_prueba){
+      flag_ISR_prueba=false;
+      a1_Nodo_Destellos(1,3);
+    }
+    if(flag_temporizador_1){
+      // flag_temporizador_1=false;
+      // a1_Nodo_Destellos(3, 1);
+    }
   //5. RFM95 Funciones.
     //-5.1 RFM95 RUN.
       RFM95_recibir(LoRa.parsePacket());
@@ -206,8 +220,8 @@ void loop(){
         if(sender==siguiente){
           b2();
         }
-        if(modo_Continuo && flag_Un_segundo){
-          flag_Un_segundo=false;
+        if(modo_Continuo && flag_temporizador_1){
+          flag_temporizador_1=false;
           a5_Nodo_Mensaje_ID();
           b3();
         }
@@ -384,7 +398,7 @@ void loop(){
       x3=funtion_Parmeter3.toInt();
     // Function Tipo A
       if (funtion_Mode=="A" && funtion_Number=="1"){
-        Serial.println("funion A Nº1");
+        Serial.println("funion A Nº001");
         a1_Nodo_Destellos(x1,x2);
       }
       if (funtion_Mode=="A" && funtion_Number=="2"){
