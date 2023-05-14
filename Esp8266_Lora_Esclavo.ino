@@ -95,8 +95,8 @@
       String outgoing;              // outgoing message
       byte msg1_Write = 0;            // Habilito bandera del Nodo que envia 
       byte msg2_Write = 0;            // Habilito bandera del Nodo que envia
-      byte localAddress = 0x01;     // address of this device           a3
-      byte destination = 0xFF;      // destination to send to           a4
+      byte localAddress = 0xFF;     // address of this device           a3
+      byte destination = 0x01;      // destination to send to           a4
       long lastSendTime = 0;        // last send time
       int interval = 2000;
       byte msg_ID;    // en modo continuo este numero incrementa automaticamente.          // interval between sends.
