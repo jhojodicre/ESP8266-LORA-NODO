@@ -133,8 +133,11 @@
     }
     //-5.3 Interrupciones por Timer 1.
     void ISR_temporizador_1(){
-      flag_temporizador_1=true;
-      responder=true;
+      if(modo_Continuo){
+        flag_temporizador_1=true;
+        responder=true;
+      }
+      
     }
 void setup(){
   //1. Configuracion de Puertos.
@@ -222,6 +225,9 @@ void loop(){
           a5_Nodo_Mensaje_ID();
           b3();
           RFM95_enviar(Nodo_info+letras);
+        }
+        else if(localAddress){
+          RFM95_enviar(letras);
         }
       }
     //-5.2 RFM95 RECIBIR.
