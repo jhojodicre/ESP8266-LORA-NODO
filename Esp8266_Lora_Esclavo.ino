@@ -226,7 +226,7 @@ void loop(){
           b3();
           RFM95_enviar(Nodo_info+letras);
         }
-        else if(localAddress){
+        else if(localAddress==master){
           RFM95_enviar(letras);
         }
       }
