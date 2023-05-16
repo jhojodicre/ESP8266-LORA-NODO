@@ -164,7 +164,7 @@ void setup(){
     //-3.2 Interrupciones Habilitadas.
       //****************************
       attachInterrupt (digitalPinToInterrupt (PB_ENTER), ISR_1, FALLING);  // attach interrupt handler for D2
-      temporizador_1.attach(3, ISR_temporizador_1);
+      // temporizador_1.attach(3, ISR_temporizador_1);
       //interrupts ();
   //4. Prueba de Sitema Minimo Configurado.
     //****************************
@@ -212,8 +212,8 @@ void loop(){
   //5. RFM95 Funciones.
     //-5.2 Responsde si el mensaje es para él.
       if(responder){
-        if(sender==master){
-          b1();
+        if(sender==master && recipient==localAddress){
+          b3();
           RFM95_enviar(Nodo_info+letras);
         }
         else if(sender==siguiente){
@@ -229,8 +229,12 @@ void loop(){
         else if(localAddress==master){
           RFM95_enviar(letras);
         }
+        else if(recipient==localAddress){
+          b1();
+          RFM95_enviar(Nodo_info+letras);
+        }
       }
-    //-5.2 RFM95 RECIBIR.
+    // -5.2 RFM95 RECIBIR.
       RFM95_recibir(LoRa.parsePacket());
 }
 //1. Funciones de Logic interna del Micro.
@@ -340,10 +344,19 @@ void loop(){
 
     }
     void b2 (){
-      // Decodifico quien envia el mensaje.
-      // Establecer la proxima direccion del Nodo
-      // Si es el Ultimo Nodo Enviar al Maestro.
-     // Nodo_cercano=
+      // 1. Destinatario.
+      destination=0;                           // Respondo a quien me escribe.
+      // 2. Remitente.
+      //localAddress=String(Nodo).toInt();            // Establecer direccion Local.
+      // 3. Nodos Leidos 1.
+      msg1_Write=incomingMsgId1;
+      // 4. Nodos Leidos 2.
+      msg2_Write=incomingMsgId2;
+      // 5. Longitud de Bytes de la Cadena incoming.
+      // Este byte lo escribe antes de Enviar el mensaje.
+      // 6. Este byte contiene Informacion del Nodo.
+      Nodo_info=String(Alarma_Zona_1+Alarma_Zona_2, HEX);
+      // 7. Byte Escrito desde recepcion Serial o Predefinido.
     }
     void b3 (){
       // Informacion Acerca de los nodos que pude LEER.
@@ -570,15 +583,14 @@ void loop(){
       Serial.println("Snr: " + String(LoRa.packetSnr()));
       Serial.println();
 
-      //Verificamos que el mensaje que nos llega sea para nosotros
-      if(recipient==localAddress){
-        inputString=incoming;
-        stringComplete=true;
-        responder=true;
-      }
+
+      inputString=incoming;
+      stringComplete=true;
+      responder=true;
     }
   //-5.2 RFM95 ENVIAR.
     void RFM95_enviar(String outgoing){
+      Serial.println(".");
       LoRa.beginPacket();                   // start packet
       LoRa.write(destination);              // add destination address
       LoRa.write(localAddress);             // add sender address
