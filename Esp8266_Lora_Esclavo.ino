@@ -210,13 +210,11 @@ void loop(){
     }
 
   //5. RFM95 Funciones.
-    //-5.1 RFM95 RECIBIR.
-      RFM95_recibir(LoRa.parsePacket());
-    //-5.2 Responsde si el mensaje es para él.
+    //-5.1 Responsde si el mensaje es para él.
       if(responder){
         if(sender==master && recipient==localAddress){
           b3();
-          RFM95_enviar(Nodo_info+letras);
+          RFM95_enviar(Nodo_info+letras+"R");
         }
         if(sender==siguiente){
           b2();
@@ -236,6 +234,8 @@ void loop(){
           RFM95_enviar(Nodo_info+letras);
         }
       }
+    //-5.2 RFM95 RECIBIR.
+      RFM95_recibir(LoRa.parsePacket());  
 }
 //1. Funciones de Logic interna del Micro.
   void welcome(){
@@ -587,6 +587,10 @@ void loop(){
       inputString=incoming;
       stringComplete=true;
       responder=true;
+      
+      if(inputString.endsWith("R")){
+        responder=false;
+      }
     }
   //-5.2 RFM95 ENVIAR.
     void RFM95_enviar(String outgoing){
