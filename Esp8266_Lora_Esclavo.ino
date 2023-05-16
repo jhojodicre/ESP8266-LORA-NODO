@@ -604,4 +604,5 @@ void loop(){
       LoRa.print(outgoing);                 // add payload
       LoRa.endPacket();                     // finish packet and send it
       responder=false;
-    }    
+    }
+    // Arregalr el mensaje que se envia en la cadena letras, que sea de 3 letras mas la R al final    
