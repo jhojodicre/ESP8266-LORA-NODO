@@ -417,11 +417,11 @@ void loop(){
         Serial.println("funion A Nº001");
         a1_Nodo_Destellos(x1,x2);
       }
-      else if (funtion_Mode=="A" && funtion_Number=="2"){
+      if (funtion_Mode=="A" && funtion_Number=="2"){
         Serial.println("funion A Nº2");
         a2();
       }
-      else if (funtion_Mode=="A" && funtion_Number=="3"){
+      if (funtion_Mode=="A" && funtion_Number=="3"){
         // FUNCIONO A MEDIAS SOLO DIRECIONES BAJAS Y 255 falta acomodar un poco mas
         Serial.println("funion A Nº3");
         String Nodo_direccion_aux = "";
@@ -431,27 +431,27 @@ void loop(){
         //Serial.println(Nodo_direccion);
         a3_Nodo_Direccion_Local(Nodo_direccion);
       }
-      else if (funtion_Mode=="A" && funtion_Number=="4"){
+      if (funtion_Mode=="A" && funtion_Number=="4"){
         Serial.println("funion A Nº4");
         String Nodo_destino_aux = "";
         Nodo_destino_aux = funtion_Parmeter1+funtion_Parmeter2+funtion_Parmeter3;
         int Nodo_destino = Nodo_destino_aux.toInt();
         a4_Nodo_Direccion_Destino(Nodo_destino);
       }
-      else if (funtion_Mode=="A" && funtion_Number=="5"){
+      if (funtion_Mode=="A" && funtion_Number=="5"){
         Serial.println("funion A Nº5");
       }
-      else if (funtion_Mode=="A" && funtion_Number=="6"){
+      if (funtion_Mode=="A" && funtion_Number=="6"){
         Serial.println("funion A Nº6: Numero de Nodos");
         String Nodos_numeros_aux = funtion_Parmeter1+funtion_Parmeter2;
         int Nodos_numeros = Nodos_numeros_aux.toInt();
         a6_Nodo_Numeros(Nodos_numeros);
       }
-      else if (funtion_Mode=="A" && funtion_Number=="7"){
+      if (funtion_Mode=="A" && funtion_Number=="7"){
         Serial.println("funion A Nº7");
         a7(x1);
       }
-      else if (funtion_Mode=="A" && funtion_Number=="8"){
+      if (funtion_Mode=="A" && funtion_Number=="8"){
         Serial.println("funion A Nº8 Status");
         //1.
         Serial.print("Direccion Local: ");
@@ -472,55 +472,55 @@ void loop(){
         // Serial.print(": ");
         // Serial.println();
       }
-      else if (funtion_Mode=="A" && funtion_Number=="9"){
+      if (funtion_Mode=="A" && funtion_Number=="9"){
         Serial.println("funion A Nº9");
         responder=true;
         letras=inputString.substring(2);
         // Serial.println(letras);
       }
-      else if (funtion_Mode=="A" && funtion_Number=="0"){
+      if (funtion_Mode=="A" && funtion_Number=="0"){
         Serial.println("funion A Nº0");
         RFM95_enviar("Maestro");
       }
     // Function Tipo B
       //
-      else if (funtion_Mode=="B" && funtion_Number=="1"){
+      if (funtion_Mode=="B" && funtion_Number=="1"){
         Serial.println("funion B Nº1: Quien envia?");
         b1();
       }
-      else if (funtion_Mode=="B" && funtion_Number=="2"){
+      if (funtion_Mode=="B" && funtion_Number=="2"){
         Serial.println("funion B Nº2: Preparo informacion propia");
         b2();
       }
-      else if (funtion_Mode=="B" && funtion_Number=="3"){
+      if (funtion_Mode=="B" && funtion_Number=="3"){
         Serial.println("funion B Nº3:  info recibida ");
         b3();
       }
-      else if (funtion_Mode=="B" && funtion_Number=="4"){
+      if (funtion_Mode=="B" && funtion_Number=="4"){
         Serial.println("funion B Nº4");
         b4(1,1);
       }
-      else if (funtion_Mode=="B" && funtion_Number=="5"){
+      if (funtion_Mode=="B" && funtion_Number=="5"){
         Serial.println("funion B Nº5");
         b5(1,1);
       }
-      else if (funtion_Mode=="B" && funtion_Number=="6"){
+      if (funtion_Mode=="B" && funtion_Number=="6"){
         Serial.println("funion B Nº6");
         b6(1,1);
       }        
-      else if (funtion_Mode=="B" && funtion_Number=="7"){
+      if (funtion_Mode=="B" && funtion_Number=="7"){
         Serial.println("funion B Nº7");
         b7(1,1);
       }
-      else if (funtion_Mode=="B" && funtion_Number=="8"){
+      if (funtion_Mode=="B" && funtion_Number=="8"){
         Serial.println("funion B Nº8");
         b8(1,1);
       }     
-      else if (funtion_Mode=="B" && funtion_Number=="9"){
+      if (funtion_Mode=="B" && funtion_Number=="9"){
         Serial.println("funion B Nº9");
         b9(1,1);
       }     
-      else if (funtion_Mode=="B" && funtion_Number=="0"){
+      if (funtion_Mode=="B" && funtion_Number=="0"){
         Serial.println("funion B Nº0");
         b0();
       }                            
