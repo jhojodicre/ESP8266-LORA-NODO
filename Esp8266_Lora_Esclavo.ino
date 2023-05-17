@@ -372,7 +372,7 @@ void loop(){
         // Este byte lo escribe antes de Enviar el mensaje
       // 6. Este byte contiene Informacion del Nodo
       a5_Nodo_Mensaje_ID();
-      Nodo_info=String(msg_ID, HEX);
+      // Nodo_info=String(msg_ID, HEX);
       // 7. Byte Escrito desde recepcion Serial o Predefinido.
       // 7. Byte Escrito desde recepcion Serial o Predefinido.
     }
