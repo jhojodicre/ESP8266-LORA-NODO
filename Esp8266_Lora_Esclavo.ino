@@ -168,10 +168,10 @@ void setup(){
       //interrupts ();
   //4. Prueba de Sitema Minimo Configurado.
     //****************************
-    Serial.println("Sistema Minimo Configurado");
+      Serial.println("Sistema Minimo Configurado");
   //5. Configuracion de DEVICE externos.
     //-5.1 RFM95 Configuracion.
-      LoRa.setPins(RFM95_CS, RFM95_RST, RFM95_INIT);
+    LoRa.setPins(RFM95_CS, RFM95_RST, RFM95_INIT);
     //-5.2 RFM95 Iniciar.
       //****************************
       if (!LoRa.begin(RFM95_FREQ)) {
@@ -229,7 +229,7 @@ void loop(){
         if(localAddress==master){
           RFM95_enviar(letras);
         }
-        if(recipient==localAddress){
+        if(sender!=master && recipient==localAddress){
           b1();
           RFM95_enviar(Nodo_info+letras);
         }
@@ -371,10 +371,10 @@ void loop(){
       // 5. Longitud de Bytes de la Cadena incoming
         // Este byte lo escribe antes de Enviar el mensaje
       // 6. Este byte contiene Informacion del Nodo
+      a5_Nodo_Mensaje_ID();
       Nodo_info=String(msg_ID, HEX);
       // 7. Byte Escrito desde recepcion Serial o Predefinido.
       // 7. Byte Escrito desde recepcion Serial o Predefinido.
-      
     }
     void b4 (int a1, int a2){
       int aa=a1;
@@ -535,10 +535,10 @@ void loop(){
       if(!digitalRead(Zona_1)){
         Alarma_Zona_1=1;
       }
-      if(!digitalRead(Zona_1));{
+      if(!digitalRead(Zona_2));{
         Alarma_Zona_2=1;
       }
-      if(!digitalRead(Zona_1));{
+      if(!digitalRead(Zona_3));{
         Alarma_Zona_3=1;
       }
       if(!digitalRead(Aceptar)){
