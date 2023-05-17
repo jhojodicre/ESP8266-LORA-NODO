@@ -59,7 +59,7 @@
         int Zona_2 = 10;        // Entrada de Zona 2
         int Zona_3 = 9;         // Entrada de Zona 3
         int Aceptar= 0;         // Entrada de Pulsador Aceptar
-
+        byte 
 
       unsigned long tiempo1;
       unsigned long tiempo2;
@@ -338,7 +338,7 @@ void loop(){
       // 5. Longitud de Bytes de la Cadena incoming.
       // Este byte lo escribe antes de Enviar el mensaje.
       // 6. Este byte contiene Informacion del Nodo.
-      Nodo_info=String(Alarma_Zona_1+Alarma_Zona_2, HEX);
+      Nodo_info=String(nodo_informa, HEX);
       // 7. Byte Escrito desde recepcion Serial o Predefinido.
       // 7. Byte Escrito desde recepcion Serial o Predefinido.
 
@@ -534,12 +534,18 @@ void loop(){
     void reviso(){
       if(!digitalRead(Zona_1)){
         Alarma_Zona_1=1;
+        Nodo_info=1;
       }
       if(!digitalRead(Zona_2));{
         Alarma_Zona_2=1;
+        Nodo_info=2;
       }
       if(!digitalRead(Zona_3));{
         Alarma_Zona_3=1;
+        Nodo_info=4;
+      }
+      if(Alarma_Zona_1 && Alarma_Zona_2){
+        Nodo_info=3;
       }
       if(!digitalRead(Aceptar)){
         Alarma_Zona_1=0;
