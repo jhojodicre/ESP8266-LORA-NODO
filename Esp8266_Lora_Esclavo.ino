@@ -543,22 +543,7 @@ void loop(){
   }
 //4. Funcion que Revisa estados a ser enviados.
   //-4.1 Estados de Zonas.
-    void reviso(){
-      if(!digitalRead(Zona_1)){
-        Alarma_Zona_1=1;
-        Nodo_info=1;
-      }
-      // if(!digitalRead(Zona_2));{
-      //   Alarma_Zona_2=1;
-      //   Nodo_info=2;
-      // }
-      // if(!digitalRead(Zona_3));{
-      //   Alarma_Zona_3=1;
-      //   Nodo_info=4;
-      // }
-      // if(Alarma_Zona_1 && Alarma_Zona_2){
-      //   Nodo_info=3;
-      // }
+    void reviso(){      
       if(!digitalRead(Aceptar)){
         Alarma_Zona_1=0;
         Alarma_Zona_2=0;
