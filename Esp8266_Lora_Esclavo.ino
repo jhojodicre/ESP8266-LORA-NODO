@@ -59,13 +59,12 @@
         int Zona_2 = 10;        // Entrada de Zona 2
         int Zona_3 = 9;         // Entrada de Zona 3
         int Aceptar= 0;         // Entrada de Pulsador Aceptar
-        byte 
 
       unsigned long tiempo1;
       unsigned long tiempo2;
-      int Zonas=0;
+      byte Zonas=0;
       String Compañeros="0";
-
+      String info_1="";
 
       String Nodo ="1";
       bool responder=false;
@@ -128,7 +127,17 @@
       }
     }
   //-5.2 Extern Function
+    ICACHE_RAM_ATTR void ISR_0(){
+      flag_ISR_prueba=true;
+      Zonas=0;
+    }
     ICACHE_RAM_ATTR void ISR_1(){
+      bitSet(Zonas, 0);
+    }
+    ICACHE_RAM_ATTR void ISR_2(){
+      bitSet(Zonas, 1);
+    }
+    ICACHE_RAM_ATTR void ISR_3(){
       flag_ISR_prueba=true;
     }
     //-5.3 Interrupciones por Timer 1.
@@ -163,7 +172,10 @@ void setup(){
     //-3.2 Temporizador.
     //-3.2 Interrupciones Habilitadas.
       //****************************
-      attachInterrupt (digitalPinToInterrupt (PB_ENTER), ISR_1, FALLING);  // attach interrupt handler for D2
+      attachInterrupt (digitalPinToInterrupt (PB_ENTER), ISR_0, FALLING);  // attach interrupt handler for D2
+      attachInterrupt (digitalPinToInterrupt (Zona_1), ISR_1, FALLING);  // attach interrupt handler for D2
+      attachInterrupt (digitalPinToInterrupt (Zona_2), ISR_2, FALLING);  // attach interrupt handler for D2
+      attachInterrupt (digitalPinToInterrupt (Zona_3), ISR_3, FALLING);  // attach interrupt handler for D2
       // temporizador_1.attach(3, ISR_temporizador_1);
       //interrupts ();
   //4. Prueba de Sitema Minimo Configurado.
@@ -464,7 +476,7 @@ void loop(){
         Serial.println(modo_Continuo);
         //4.
         Serial.print("Entradas: ");
-        Serial.println(Nodo_info);
+        Serial.println(info_1=String(Zonas, BIN));
         // //5.
         // Serial.print(": ");
         // Serial.println();
@@ -536,21 +548,22 @@ void loop(){
         Alarma_Zona_1=1;
         Nodo_info=1;
       }
-      if(!digitalRead(Zona_2));{
-        Alarma_Zona_2=1;
-        Nodo_info=2;
-      }
+      // if(!digitalRead(Zona_2));{
+      //   Alarma_Zona_2=1;
+      //   Nodo_info=2;
+      // }
       // if(!digitalRead(Zona_3));{
       //   Alarma_Zona_3=1;
       //   Nodo_info=4;
       // }
-      if(!Alarma_Zona_1 && !Alarma_Zona_2){
-        Nodo_info=3;
-      }
+      // if(Alarma_Zona_1 && Alarma_Zona_2){
+      //   Nodo_info=3;
+      // }
       if(!digitalRead(Aceptar)){
         Alarma_Zona_1=0;
         Alarma_Zona_2=0;
         Alarma_Zona_3=0;
+        Nodo_info=0;
       }
     }
 //5. Funciones de Dispositivos Externos.
