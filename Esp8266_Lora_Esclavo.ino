@@ -463,8 +463,8 @@ void loop(){
         Serial.print("Modo Continuo: ");
         Serial.println(modo_Continuo);
         //4.
-        // Serial.print(": ");
-        // Serial.println();
+        Serial.print("Entradas: ");
+        Serial.println(Nodo_info);
         // //5.
         // Serial.print(": ");
         // Serial.println();
@@ -540,11 +540,11 @@ void loop(){
         Alarma_Zona_2=1;
         Nodo_info=2;
       }
-      if(!digitalRead(Zona_3));{
-        Alarma_Zona_3=1;
-        Nodo_info=4;
-      }
-      if(Alarma_Zona_1 && Alarma_Zona_2){
+      // if(!digitalRead(Zona_3));{
+      //   Alarma_Zona_3=1;
+      //   Nodo_info=4;
+      // }
+      if(!Alarma_Zona_1 && !Alarma_Zona_2){
         Nodo_info=3;
       }
       if(!digitalRead(Aceptar)){
@@ -612,3 +612,4 @@ void loop(){
       responder=false;
     }
     // Arregalr el mensaje que se envia en la cadena letras, que sea de 3 letras mas la R al final    
+    // Mejorar el mensaje de las entradas digitales, 
