@@ -5,41 +5,39 @@
     #include <SPI.h>
     #include <LoRa.h>
     #include <Ticker.h>
-//2. Definicion de Pinout.
+//2. Defflag_F_inicion de Pinout.
   //  Las Etiquetas para los pinout son los que comienzan con GPIO
   //  Es decir, si queremos activar la salida 1, tenemos que buscar la referencia GPIO 1, Pero solomante Escribir 1 sin "GPIO"
   //  NO tomar como referencia las etiquetas D1, D2,D3, ....Dx.
   
-  //-2.1 Definicion de etiquetas para las Entradas.
+  //-2.1 Defflag_F_inicion de etiquetas para las Entradas.
+    #define in_Zona_1     4         // Entrada de Zona 1
+    #define in_Zona_2     10        // Entrada de Zona 2
+    #define in_Zona_3     9         // Entrada de Zona 3
+    #define in_PB_Aceptar 0         // Entrada de Pulsador in_PB_Aceptar 
+  //-2.2 Defflag_F_inicion de etiquetas para las Salidas.
     //********************************************************
-    #define PB_ENTER 0
-  //-2.2 Definicion de etiquetas para las Salidas.
-    //********************************************************
-    #define LED_azul 2
+    #define LED_azul      2
 
   //-2.3 RFM95 Modulo de comunicacion
-    #define RFM95_RST 16
-    #define RFM95_CS 15
-    #define RFM95_INIT 5
+    #define RFM95_RST     16
+    #define RFM95_CS      15
+    #define RFM95_INIT    5
 
   //-2.4. Constantes
     //********************************************************
     #define RFM95_FREQ 915E6  
   //-2.5 timer
 
-
 //3. Variables Globales.
-  //********************************************************
-
   //-3.1 Variables para las Interrupciones
-    String inputString;                     // Buffer recepcion Serial.
-    volatile  bool stringComplete= false;   // Flag: mensaje Serial Recibido completo.
-    volatile  bool flag_ISR_prueba=false;   // Flag: prueba para interrupcion serial.
-    volatile  int contador=0;
-    volatile  bool flag_temporizador_1=false;
+    String    inputString;                            // Buffer recepcion Serial.
+    volatile  bool falg_ISR_stringComplete= false;    // Flag: mensaje Serial Recibido completo.
+    volatile  bool flag_ISR_prueba=false;             // Flag: prueba para interrupcion serial.
+    volatile  bool flag_ISR_temporizador_1=false;
+
   //-3.2 Variables Globales para Las Funciones.
     //********************************************************
-    bool inicio=true;             // Habilitar mensaje de inicio por unica vez
     String funtion_Mode;          // Tipo de funcion para ejecutar.
     String funtion_Number;        // Numero de funcion a EJECUTAR.
     String funtion_Parmeter1;     // Parametro 1 de la Funcion.
@@ -50,63 +48,54 @@
     volatile int x2=0;
     volatile int x3=0;
 
-    bool codified_funtion=false;  // Notifica que la funcion ha sido codificada.
+    bool flag_F_codified_funtion=false;   // Notifica que la funcion ha sido codificada.
+    bool flag_F_Un_segundo=false;         // Se activa cuando Pasa un Segundo por Interrupcion.
+    bool flag_F_inicio=true;              // Habilitar mensaje de flag_F_inicio por unica vez
+    bool flag_F_responder=false;          // Se activa cuando recibe un mensaje para luego responder.
+    bool flag_F_modo_Continuo;
     
-    bool flag_Un_segundo=false;
-    // Variables Para Hardware.
-      //Entradas
-        int Zona_1 = 4;         // Entrada de Zona 1
-        int Zona_2 = 10;        // Entrada de Zona 2
-        int Zona_3 = 9;         // Entrada de Zona 3
-        int Aceptar= 0;         // Entrada de Pulsador Aceptar
+// Variables para Logica interna
+      String    Nodo_info="";
+      String    letras="";
+      String    info_1="";
+      byte      master=0xFF;
+      byte      siguiente=2;         // Direccion del Nodo que sigue para enviar mensaje
+      byte      Zonas=0;             // Estado de Zonas Activas.
+      int       Nodos = 2;            // Establece Cuantos Nodos Conforman La Red a6.
+      
+      //************************
+      // String Compañeros="0";
+      // String Nodo ="1";
+      // String Nodo_cercano=""; // Guardo la direccion del Nodo que escribe
+      // bool Nodo_Reconocido=0;
+      // unsigned long tiempo1;
+      // unsigned long tiempo2;      
+      //************************
 
-      unsigned long tiempo1;
-      unsigned long tiempo2;
-      byte Zonas=0;
-      String Compañeros="0";
-      String info_1="";
-
-      String Nodo ="1";
-      bool responder=false;
-      int Nodos = 2;         // Establece Cuantos Nodos Conforman La Red a6.
-      bool modo_Continuo;
-      // Variables para Logica interna
-      byte compañeros1;
-      byte compañeros2;
-      String Nodo_info="";
-      String letras="";
-      String Nodo_cercano=""; // Guardo la direccion del Nodo que escribe
+      
     // Alarmas
-      int Alarma_Zona_1=0;
-      int Alarma_Zona_2=0;
-      int Alarma_Zona_3=0;
+      int Alarma_in_Zona_1=0;
+      int Alarma_in_Zona_2=0;
+      int Alarma_in_Zona_3=0;
     // Eventos
-      bool Nodo_Reconocido=0;
+      
   //-3.3 RFM95 Variables.
-    //********************************************************
-    int16_t packetnum = 0;  // packet counter, we increment per xmission
-    unsigned int placa; // placa en el perimetro.
-    unsigned int zona;  // Zona del perimetro.
-    byte master=0xFF;
-    byte siguiente=2; // Direccion del Nodo que sigue para enviar mensaje
-    // Variables para enviar.
-      int packetSize = 0;
-      String outgoing;              // outgoing message
-      byte msg1_Write = 0;            // Habilito bandera del Nodo que envia 
-      byte msg2_Write = 0;            // Habilito bandera del Nodo que envia
-      byte localAddress = 0x01;     // address of this device           a3
-      byte destination = 0xFF;      // destination to send to           a4
-      long lastSendTime = 0;        // last send time
-      int interval = 2000;
-      byte msg_ID;    // en modo continuo este numero incrementa automaticamente.          // interval between sends.
-    // Variables para recibir.
-      int recipient;          // recipient address
-      byte sender;            // sender address
-      byte incomingMsgId1;     // incoming msg ID
-      byte incomingMsgId2;     // incoming msg ID
-      byte nodo_informa;       // informacion particular que envia el nodo
-      byte incomingLength;    // incoming msg length
-      String incoming = "";
+      byte    msg1_Write = 0;       // Habilito bandera del Nodo que envia 
+      byte    msg2_Write = 0;       // Habilito bandera del Nodo que envia
+      byte    localAddress = 0x01;  // address of this device           a3
+      byte    destination = 0xFF;   // destination to send to           a4
+      // long lastSendTime = 0;        // last send time
+      // int interval = 2000;
+      byte    msgNumber;               // en modo continuo este numero incrementa automaticamente.          // interval between sends.
+      byte    sender;               // sender address
+      byte    incomingMsgId1;       // incoming msg ID
+      byte    incomingMsgId2;       // incoming msg ID
+      byte    nodo_informa;         // informacion particular que envia el nodo
+      byte    incomingLength;       // incoming msg length
+      String  incoming = "";
+      String  outgoing;             // outgoing message
+      int     recipient;            // recipient address
+
 //4. Intancias.
   //********************************************************
   Ticker temporizador_1;
@@ -121,8 +110,8 @@
         // if the incoming character is a newline, set a flag so the main loop can
         // do something about it:
         if (inChar == '\n') {
-          stringComplete = true;
-          codified_funtion=false;
+          falg_ISR_stringComplete = true;
+          flag_F_codified_funtion=false;
         }
       }
     }
@@ -142,9 +131,9 @@
     }
     //-5.3 Interrupciones por Timer 1.
     void ISR_temporizador_1(){
-      if(modo_Continuo){
-        flag_temporizador_1=true;
-        responder=true;
+      if(flag_F_modo_Continuo){
+        flag_ISR_temporizador_1=true;
+        flag_F_responder=true;
       }
       
     }
@@ -156,10 +145,10 @@ void setup(){
       pinMode(RFM95_RST, OUTPUT);
       pinMode(LED_azul, OUTPUT);
     //1.2 Configuracion de Entradas
-      pinMode(Zona_1, INPUT_PULLUP);
-      pinMode(Zona_2, INPUT_PULLUP);
-      pinMode(Zona_3, INPUT_PULLUP);
-      pinMode(Aceptar, INPUT_PULLUP);
+      pinMode(in_Zona_1, INPUT_PULLUP);
+      pinMode(in_Zona_2, INPUT_PULLUP);
+      pinMode(in_Zona_3, INPUT_PULLUP);
+      pinMode(in_PB_Aceptar, INPUT_PULLUP);
   //2. Condiciones Iniciales.
     //-2.1 Estado de Salidas.
       digitalWrite(LED_azul,HIGH);
@@ -172,10 +161,10 @@ void setup(){
     //-3.2 Temporizador.
     //-3.2 Interrupciones Habilitadas.
       //****************************
-      attachInterrupt (digitalPinToInterrupt (PB_ENTER), ISR_0, FALLING);  // attach interrupt handler for D2
-      attachInterrupt (digitalPinToInterrupt (Zona_1), ISR_1, FALLING);  // attach interrupt handler for D2
-      attachInterrupt (digitalPinToInterrupt (Zona_2), ISR_2, FALLING);  // attach interrupt handler for D2
-      attachInterrupt (digitalPinToInterrupt (Zona_3), ISR_3, FALLING);  // attach interrupt handler for D2
+      attachInterrupt (digitalPinToInterrupt (in_PB_Aceptar), ISR_0, FALLING);  // attach interrupt handler for D2
+      attachInterrupt (digitalPinToInterrupt (in_Zona_1), ISR_1, FALLING);  // attach interrupt handler for D2
+      attachInterrupt (digitalPinToInterrupt (in_Zona_2), ISR_2, FALLING);  // attach interrupt handler for D2
+      attachInterrupt (digitalPinToInterrupt (in_Zona_3), ISR_3, FALLING);  // attach interrupt handler for D2
       // temporizador_1.attach(3, ISR_temporizador_1);
       //interrupts ();
   //4. Prueba de Sitema Minimo Configurado.
@@ -196,21 +185,21 @@ void setup(){
 void loop(){
   //1. Bienvenida Funcion 
     //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    while (inicio){
+    while (flag_F_inicio){
       welcome();        // Comprobamos el Sistema minimo de Funcionamiento.
       led_Monitor(3);
     }
   //2. Decodificar funcion serial
     //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    if(stringComplete){
+    if(falg_ISR_stringComplete){
       decodificar_solicitud();
     }
   //3. Ejecutar Funcion
     //-3.1 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-      if(codified_funtion){
+      if(flag_F_codified_funtion){
         ejecutar_solicitud();
         // 3.1 Desactivar Banderas.
-        codified_funtion=false;
+        flag_F_codified_funtion=false;
         inputString="";
       }
     //-3.2 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -223,7 +212,7 @@ void loop(){
 
   //5. RFM95 Funciones.
     //-5.1 Responsde si el mensaje es para él.
-      if(responder){
+      if(flag_F_responder){
         if(sender==master && recipient==localAddress){
           b3();
           RFM95_enviar(Nodo_info+letras+"R");
@@ -232,8 +221,8 @@ void loop(){
           b2();
           RFM95_enviar(Nodo_info+letras);
         }
-        if(modo_Continuo && flag_temporizador_1){
-          flag_temporizador_1=false;
+        if(flag_F_modo_Continuo && flag_ISR_temporizador_1){
+          flag_ISR_temporizador_1=false;
           a5_Nodo_Mensaje_ID();
           b3();
           RFM95_enviar(Nodo_info+letras);
@@ -252,7 +241,7 @@ void loop(){
 //1. Funciones de Logic interna del Micro.
   void welcome(){
     // Deshabilitamos Banderas
-      inicio=false;
+      flag_F_inicio=false;
       Serial.println("Sistema Iniciado");
       Serial.println("Direccion: ");
       Serial.println(localAddress);
@@ -269,8 +258,8 @@ void loop(){
   }
   void decodificar_solicitud(){
     //Deshabilitamos Banderas
-    stringComplete=false;
-    codified_funtion=true;
+    falg_ISR_stringComplete=false;
+    flag_F_codified_funtion=true;
     funtion_Mode=inputString.substring(0,1);
     funtion_Number=inputString.substring(1,2);
     funtion_Parmeter1=inputString.substring(2,3);
@@ -318,7 +307,7 @@ void loop(){
       
     }
     void a5_Nodo_Mensaje_ID(){      
-      msg_ID++;                           // increment message ID.
+      msgNumber++;                           // increment message ID.
     }
     void a6_Nodo_Numeros(int parametro_1){
       Nodos=parametro_1;  
@@ -326,13 +315,13 @@ void loop(){
     void a7(int tipo_Modo){
       int a=tipo_Modo;
       if(a==1){
-        modo_Continuo=true;
-        responder=true;
+        flag_F_modo_Continuo=true;
+        flag_F_responder=true;
         temporizador_1.attach(1, ISR_temporizador_1);
       }
       if(a==0){
-        modo_Continuo=false;
-        responder=false;
+        flag_F_modo_Continuo=false;
+        flag_F_responder=false;
         temporizador_1.detach();
       }
     }
@@ -367,12 +356,12 @@ void loop(){
       // 5. Longitud de Bytes de la Cadena incoming.
       // Este byte lo escribe antes de Enviar el mensaje.
       // 6. Este byte contiene Informacion del Nodo.
-      Nodo_info=String(Alarma_Zona_1+Alarma_Zona_2, HEX);
+      Nodo_info=String(Alarma_in_Zona_1+Alarma_in_Zona_2, HEX);
       // 7. Byte Escrito desde recepcion Serial o Predefinido.
     }
     void b3 (){
       // Informacion Acerca de los nodos que pude LEER.
-      // Si el mensaje viene del Maestro, preparar el mesaje para responder al Maestro
+      // Si el mensaje viene del Maestro, preparar el mesaje para flag_F_responder al Maestro
       destination=master;                           // Respondo a quien me escribe.
       // 2. Remitente.
       //localAddress=String(Nodo).toInt();            // Establecer direccion Local.
@@ -384,7 +373,7 @@ void loop(){
         // Este byte lo escribe antes de Enviar el mensaje
       // 6. Este byte contiene Informacion del Nodo
       a5_Nodo_Mensaje_ID();
-      // Nodo_info=String(msg_ID, HEX);
+      // Nodo_info=String(msgNumber, HEX);
       // 7. Byte Escrito desde recepcion Serial o Predefinido.
       // 7. Byte Escrito desde recepcion Serial o Predefinido.
     }
@@ -473,7 +462,7 @@ void loop(){
         Serial.println(destination);
         //3.
         Serial.print("Modo Continuo: ");
-        Serial.println(modo_Continuo);
+        Serial.println(flag_F_modo_Continuo);
         //4.
         Serial.print("Entradas: ");
         Serial.println(info_1=String(Zonas, BIN));
@@ -486,7 +475,7 @@ void loop(){
       }
       if (funtion_Mode=="A" && funtion_Number=="9"){
         Serial.println("funion A Nº9");
-        responder=true;
+        flag_F_responder=true;
         letras=inputString.substring(2);
         // Serial.println(letras);
       }
@@ -544,10 +533,10 @@ void loop(){
 //4. Funcion que Revisa estados a ser enviados.
   //-4.1 Estados de Zonas.
     void reviso(){      
-      if(!digitalRead(Aceptar)){
-        Alarma_Zona_1=0;
-        Alarma_Zona_2=0;
-        Alarma_Zona_3=0;
+      if(!digitalRead(in_PB_Aceptar)){
+        Alarma_in_Zona_1=0;
+        Alarma_in_Zona_2=0;
+        Alarma_in_Zona_3=0;
         Nodo_info=0;
       }
     }
@@ -589,11 +578,11 @@ void loop(){
 
 
       inputString=incoming;
-      stringComplete=true;
-      responder=true;
+      falg_ISR_stringComplete=true;
+      flag_F_responder=true;
       
       if(inputString.endsWith("R")){
-        responder=false;
+        flag_F_responder=false;
       }
     }
   //-5.2 RFM95 ENVIAR.
@@ -607,7 +596,7 @@ void loop(){
       LoRa.write(outgoing.length());        // add payload length
       LoRa.print(outgoing);                 // add payload
       LoRa.endPacket();                     // finish packet and send it
-      responder=false;
+      flag_F_responder=false;
     }
     // Arregalr el mensaje que se envia en la cadena letras, que sea de 3 letras mas la R al final    
     // Mejorar el mensaje de las entradas digitales, 
